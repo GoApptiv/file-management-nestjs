@@ -1,6 +1,6 @@
-import type { AbstractEntity } from '../abstract.entity';
+import type { AbstractEntity } from '../entity/abstract.entity';
 
-export class AbstractDto {
+export class BaseDto {
   id: string;
 
   createdAt: Date;

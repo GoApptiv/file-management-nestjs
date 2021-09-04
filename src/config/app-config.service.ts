@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'src/common/strategy/snake-naming.strategy';
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 
 @Injectable()
 export class AppConfigService {
@@ -59,21 +59,16 @@ export class AppConfigService {
     };
   }
 
-  get typeOrmConfig(): MysqlConnectionOptions {
-    const entities = [__dirname + '/../../modules/**/*.entity{.ts,.js}'];
-    const migrations = [__dirname + '/../../migrations/*{.ts,.js}'];
-
+  get typeOrmConfig(): TypeOrmModuleOptions {
     return {
-      entities,
-      migrations,
       type: 'mysql',
       host: this.getString('DB_HOST'),
       port: this.getNumber('DB_PORT'),
       username: this.getString('DB_USERNAME'),
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
-      migrationsRun: true,
-      logging: this.getBoolean('ENABLE_ORMLOGS', this.isDevelopment),
+      synchronize: true,
+      autoLoadEntities: true,
       namingStrategy: new SnakeNamingStrategy(),
     };
   }

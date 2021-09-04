@@ -6,10 +6,12 @@ import { AppService } from './app.service';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { FileModule } from './modules/file/file.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     FileModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
