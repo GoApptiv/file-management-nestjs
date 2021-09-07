@@ -1,4 +1,4 @@
-import type { AbstractEntity } from '../entity/abstract.entity';
+import type { AbstractEntity } from '../entities/abstract.entity';
 
 export class BaseDto {
   id: string;

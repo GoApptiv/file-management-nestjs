@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'src/common/strategy/snake-naming.strategy';
+import { SnakeNamingStrategy } from 'src/shared/strategies/snake-naming.strategy';
 
 @Injectable()
 export class AppConfigService {
@@ -67,8 +67,8 @@ export class AppConfigService {
       username: this.getString('DB_USERNAME'),
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
-      synchronize: true,
       autoLoadEntities: true,
+      synchronize: true,
       namingStrategy: new SnakeNamingStrategy(),
     };
   }
