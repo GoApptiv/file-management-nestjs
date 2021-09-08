@@ -1,4 +1,4 @@
-import { FileStatus } from 'src/shared/constants/file-status';
+import { FileStatus } from 'src/shared/constants/file-status.enum';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Project } from 'src/modules/auth/entities/project.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -8,7 +8,7 @@ import { Template } from './template.entity';
 @Entity('files')
 export class File extends AbstractEntity {
   @Column({ unique: true })
-  hashId: string;
+  uuid: string;
 
   @Column()
   referenceNumber: string;

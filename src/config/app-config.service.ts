@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'src/shared/strategies/snake-naming.strategy';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Injectable()
 export class AppConfigService {
@@ -18,7 +18,7 @@ export class AppConfigService {
   private getNumber(key: string, defaultValue?: number): number {
     const value = this.configService.get(key, defaultValue);
     if (value === undefined) {
-      throw new Error(key + ' env var not set'); // probably we should call process.exit() too to avoid locking the service
+      throw new Error(key + ' env var not set');
     }
     try {
       return Number(value);

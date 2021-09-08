@@ -1,7 +1,30 @@
-export class RegisterFileDto {
-  reference_number: string;
-  file_name: string;
-  file_size: number;
-  file_type: string;
-  template_code: string;
+import { Type } from 'class-transformer';
+import {
+  IsInt,
+  IsMimeType,
+  IsNotEmptyObject,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+class FileDTO {
+  @IsString()
+  name: string;
+
+  @IsInt()
+  size: number;
+
+  @IsMimeType()
+  type: string;
+}
+export class RegisterFileDTO {
+  @IsString()
+  referenceNumber: string;
+
+  @IsString()
+  templateCode: string;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => FileDTO)
+  file: FileDTO;
 }

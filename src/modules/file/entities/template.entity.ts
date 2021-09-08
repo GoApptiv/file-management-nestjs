@@ -31,7 +31,7 @@ export class Template extends AbstractEntity {
   @Column({ unsigned: true, nullable: true })
   maxSize: number;
 
-  @Column({ unsigned: true, nullable: true })
+  @Column({ unsigned: true })
   linkExpiryTime: number;
 
   @ManyToMany(() => MimeType, (mimeType) => mimeType.templates)

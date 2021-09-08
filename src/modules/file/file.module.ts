@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UtilsProvider } from 'src/shared/services/utils.service';
+import { BucketConfigRepository } from '../auth/repositories/bucket-config.repository';
 import { ProjectRepository } from '../auth/repositories/project.repository';
 import { FileController } from './controllers/file.controller';
 import { FileRepository } from './repositories/file.repository';
@@ -15,9 +15,10 @@ import { FileService } from './services/file.service';
       TemplateRepository,
       MimeTypeRepository,
       ProjectRepository,
+      BucketConfigRepository,
     ]),
   ],
   controllers: [FileController],
-  providers: [FileService, UtilsProvider],
+  providers: [FileService],
 })
 export class FileModule {}

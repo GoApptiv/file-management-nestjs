@@ -1,213 +1,252 @@
+import * as moment from 'moment';
 import { Injectable } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repository';
 import { TemplateRepository } from '../repositories/template.repository';
-import * as moment from 'moment';
-import { UtilsProvider } from 'src/shared/services/utils.service';
-import { RegisterFileDto } from '../dto/register-file-dto';
 import { File } from '../entities/file.entity';
-import { FileStatus } from 'src/shared/constants/file-status';
-import { ProjectRepository } from 'src/modules/auth/repositories/project.repository';
+import { FileStatus } from 'src/shared/constants/file-status.enum';
 import { MimeTypeRepository } from '../repositories/mime-type.repository';
-import { GetSignedUrlConfig, Storage } from '@google-cloud/storage';
+import { CloudStorageService } from 'src/shared/services/cloud-storage.service';
+import { ReadSignedUrlResult } from '../results/read-signed-url.result';
+import { ConfirmUploadResult } from '../results/confirm-upload.result';
+import { WriteSignedUrlResult } from '../results/write-signed-url.result';
+import { BucketConfigRepository } from 'src/modules/auth/repositories/bucket-config.repository';
+import { BucketType } from 'src/shared/constants/bucket-type';
+import { UtilsService } from 'src/shared/services/utils.service';
+import { DuplicateReferenceNumberException } from '../exceptions/duplicate-reference-number.exception';
+import { InvalidFileException } from '../exceptions/invalid-file.exception';
+import { RegisterFileBO } from '../bo/register-file.bo';
+import { FileDAO } from '../dao/file.dao';
 
 @Injectable()
 export class FileService {
   constructor(
     private readonly templateRepository: TemplateRepository,
     private readonly fileRepository: FileRepository,
-    private readonly projectRepository: ProjectRepository,
     private readonly mimeTypeRepository: MimeTypeRepository,
+    private readonly bucketConfigRepository: BucketConfigRepository,
   ) {}
 
   /**
    * generate signed url
-   * @param {string} text
-   * @returns {string}
+   * @param data - Register file request
+   * @returns signed url and uuid
    */
-  getUploadSignedUrl = async (dto: RegisterFileDto): Promise<any> => {
-    const template = await this.templateRepository.findOne({
-      where: { code: dto.template_code },
-    });
+  async getUploadSignedUrl(
+    data: RegisterFileBO,
+  ): Promise<WriteSignedUrlResult> {
+    const template = await this.templateRepository.findByCode(
+      data.templateCode,
+    );
 
-    const hashId = this.generateHashId(dto.reference_number, 1);
-    const templateForHashId = await this.fileRepository.findOne({ hashId });
+    const uuid = this.generateUuid(data.referenceNumber, data.projectId);
+    const templateForUuId = await this.fileRepository.findByUuid(uuid);
 
-    if (templateForHashId !== undefined) {
-      throw 'External reference id already exists';
+    if (templateForUuId !== undefined) {
+      throw new DuplicateReferenceNumberException();
     }
 
     if (
       this.isFileValidForTemplate(
-        dto.template_code,
-        dto.file_size,
-        dto.file_type,
+        data.templateCode,
+        data.file.size,
+        data.file.type,
       )
     ) {
       const storagePath = this.generateStoragePath(
         template.baseStoragePath,
-        1,
-        dto.file_name,
-      );
-
-      const store = await this.storeFileUploadRequest(
-        dto,
-        1,
-        hashId,
-        storagePath,
+        data.projectId,
+        data.file.name,
+        data.referenceNumber,
       );
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTime);
 
-      const signedUrl = this.generateUploadSignedUrl(
+      const bucketConfig =
+        await this.bucketConfigRepository.findByProjectIdAndType(
+          data.projectId,
+          BucketType.STANDARD,
+        );
+
+      const storage = new CloudStorageService(
+        bucketConfig.email,
+        UtilsService.base64decodeKey(bucketConfig.key),
+        bucketConfig.name,
+      );
+
+      const signedUrl = await storage.generateUploadSignedUrl(
         storagePath,
-        dto.file_type,
+        data.file.type,
         expiryTime,
       );
 
+      const store = await this.storeFileUploadRequest(
+        data,
+        uuid,
+        storagePath,
+        template.id,
+      );
+
       return {
-        id: store.hashId,
-        signed_url: signedUrl,
+        uuid: store.uuid,
+        url: signedUrl,
         reference_number: store.referenceNumber,
       };
     }
-  };
+  }
 
   /**
-   *
-   * @param {RegisterFileDto} dto
-   * @param {number} projectId
-   * @param {string} hashId
-   * @param {string} storagePath
-   * @returns {Promise<File>}
+   * confirm upload
+   * @param uuid - uuid of the file
+   * @returns update result
    */
-  private storeFileUploadRequest = async (
-    dto: RegisterFileDto,
-    projectId: number,
-    hashId: string,
-    storagePath: string,
-  ): Promise<File> => {
-    const project = await this.projectRepository.findOne(projectId);
-    const mimeType = await this.mimeTypeRepository.findOne({
-      type: dto.file_type,
-    });
-    const template = await this.templateRepository.findOne({
-      code: dto.template_code,
-    });
+  async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
+    const updateResult = await this.fileRepository.updateByUuid(
+      uuid,
+      new FileDAO({
+        isUploaded: true,
+        status: FileStatus.PROCESSED,
+      }),
+    );
+    return {
+      uuid,
+      result: updateResult,
+    };
+  }
 
-    const file = new File();
-    file.fileSize = dto.file_size;
-    file.hashId = hashId;
+  /**
+   * generate read signed url
+   * @param uuid - hash id of the file
+   * @returns read access signed url
+   */
+  async getReadSignedUrl(uuid: string): Promise<ReadSignedUrlResult> {
+    const file = await this.fileRepository.findByUuid(uuid, ['template']);
+
+    let bucketType = BucketType.STANDARD;
+
+    if (file.isArchieved) {
+      bucketType = BucketType.ARCHIVE;
+    }
+
+    const expiryTime = this.generateExpiryTime(file.template.linkExpiryTime);
+
+    const bucketConfig =
+      await this.bucketConfigRepository.findByProjectIdAndType(
+        file.projectId,
+        bucketType,
+      );
+
+    const storage = new CloudStorageService(
+      bucketConfig.email,
+      UtilsService.base64decodeKey(bucketConfig.key),
+      bucketConfig.name,
+    );
+
+    const signedUrl = await storage.generateReadSignedUrl(
+      file.storagePath,
+      expiryTime,
+    );
+
+    return { uuid, url: signedUrl };
+  }
+
+  /**
+   * Store file request in the database
+   * @param dto - register file request
+   * @param projectId - id of the project
+   * @param uuid - generated uuid
+   * @param storagePath - storage path
+   * @param templateId - template id
+   * @returns stored record data
+   */
+  private async storeFileUploadRequest(
+    data: RegisterFileBO,
+    uuid: string,
+    storagePath: string,
+    templateId: number,
+  ): Promise<File> {
+    const mimeType = await this.mimeTypeRepository.findByType(data.file.type);
+
+    const file = new FileDAO();
+    file.fileSize = data.file.size;
+    file.uuid = uuid;
     file.isArchieved = false;
     file.isUploaded = false;
     file.status = FileStatus.REQUESTED;
     file.storagePath = storagePath;
-    file.referenceNumber = dto.reference_number;
-    file.project = project;
-    file.mimeType = mimeType;
-    file.template = template;
+    file.referenceNumber = data.referenceNumber;
+    file.projectId = data.projectId;
+    file.mimeTypeId = mimeType.id;
+    file.templateId = templateId;
 
-    return this.fileRepository.save(file);
-  };
+    return this.fileRepository.store(file);
+  }
 
   /**
    * validate file to be uploaded
-   * @param {string} templateCode
-   * @param {number} fileSize
-   * @param {string} fileType
-   * @returns {boolean}
+   * @param templateCode - Template code of the file
+   * @param fileSize - Size of the file to be uploaded
+   * @param fileType - MimeType of the file to be uploaded
+   * @returns true or false
    */
-  private isFileValidForTemplate = async (
+  private async isFileValidForTemplate(
     templateCode: string,
     fileSize: number,
     fileType: string,
-  ) => {
-    const template = await this.templateRepository.findOne({
-      where: { code: templateCode },
-      relations: ['mimeTypes'],
-    });
+  ) {
+    const template = await this.templateRepository.findByCode(templateCode, [
+      'mimeTypes',
+    ]);
 
     const mimeType = template.mimeTypes.find(
       (mimeType) => mimeType.type === fileType,
     );
 
     if (mimeType === undefined) {
-      throw 'File format not supported';
+      throw new InvalidFileException('File format not supported');
     }
 
     if (fileSize > template.maxSize) {
-      throw `File size exceeded the maximum size ${template.maxSize}`;
+      throw new InvalidFileException(
+        `File size exceeded the maximum size ${template.maxSize}`,
+      );
     }
 
     return true;
-  };
+  }
 
   /**
    * generate storage path for the file
-   * @param {string} baseStoragePath
-   * @param {string} slug
-   * @param {string} fileName
-   * @returns {string}
+   * @param baseStoragePath - Base Storage Path of the project
+   * @param slug - Slig
+   * @param fileName - Name of the file to be uploaded with extension
+   * @param referenceNumber - Reference number of the file request
+   * @returns file storage path with extension
    */
-  private generateStoragePath = (
+  private generateStoragePath(
     baseStoragePath: string,
     slug: number,
     fileName: string,
-  ): string => {
-    return `${baseStoragePath}/${slug}/${fileName}`;
-  };
+    referenceNumber: string,
+  ): string {
+    return `${baseStoragePath}/${slug}/${referenceNumber}-${fileName}`;
+  }
 
   /**
    * generate signed url expiry time
-   * @param {number|null} expiryTime
-   * @returns {moment.Moment}
+   * @param expiryTime - Expiry time in seconds
+   * @returns moment object with addition of expiry time
    */
-  private generateExpiryTime = (expiryTime: number | null): moment.Moment => {
-    if (expiryTime === null) {
-      return null;
-    }
+  private generateExpiryTime(expiryTime: number): moment.Moment {
     return moment().add(expiryTime, 'seconds');
-  };
+  }
 
   /**
    * generate hash id
-   * @param {string} referenceNumber
-   * @param {number} projectId
-   * @returns {string}
+   * @param referenceNumber - External reference number
+   * @param projectId - Project id
+   * @returns unique uuid
    */
-  private generateHashId = (
-    referenceNumber: string,
-    projectId: number,
-  ): string => {
-    return UtilsProvider.generateHash(
-      `${referenceNumber}_${projectId}`,
-      'sha1',
-    );
-  };
-
-  /**
-   * generate upload signed url
-   * @param {string} path
-   * @param {string} fileType
-   * @param {momemt.Moment} expiryTime
-   * @returns {string}
-   */
-  private generateUploadSignedUrl = async (
-    path: string,
-    fileType: string,
-    expiryTime: moment.Moment,
-  ): Promise<string> => {
-    const storage = new Storage({});
-
-    const options: GetSignedUrlConfig = {
-      version: 'v4',
-      action: 'write',
-      expires: expiryTime.toDate(),
-      contentType: fileType,
-    };
-
-    // Get a v4 signed URL for uploading file
-    const [url] = await storage.bucket('demo').file(path).getSignedUrl(options);
-
-    return url;
-  };
+  private generateUuid(referenceNumber: string, projectId: number): string {
+    return UtilsService.generateHash(`${referenceNumber}_${projectId}`, 'sha1');
+  }
 }

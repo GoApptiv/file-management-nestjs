@@ -1,7 +1,7 @@
 import type { AbstractEntity } from '../entities/abstract.entity';
 
 export class BaseDto {
-  id: string;
+  id: number;
 
   createdAt: Date;
 
