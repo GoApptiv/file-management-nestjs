@@ -16,10 +16,14 @@ import { DuplicateReferenceNumberException } from '../exceptions/duplicate-refer
 import { InvalidFileException } from '../exceptions/invalid-file.exception';
 import { RegisterFileBO } from '../bo/register-file.bo';
 import { FileDAO } from '../dao/file.dao';
+import { EventEmitter2 } from 'eventemitter2';
+import { ReadFileBo } from '../bo/read-file.bo';
+import { FileAccessedEvent } from '../events/file-accessed.event';
 
 @Injectable()
 export class FileService {
   constructor(
+    private eventEmitter: EventEmitter2,
     private readonly templateRepository: TemplateRepository,
     private readonly fileRepository: FileRepository,
     private readonly mimeTypeRepository: MimeTypeRepository,
@@ -54,7 +58,6 @@ export class FileService {
     ) {
       const storagePath = this.generateStoragePath(
         template.baseStoragePath,
-        data.projectId,
         data.file.name,
         data.referenceNumber,
       );
@@ -104,7 +107,7 @@ export class FileService {
       uuid,
       new FileDAO({
         isUploaded: true,
-        status: FileStatus.PROCESSED,
+        status: FileStatus.UPLOADED,
       }),
     );
     return {
@@ -118,8 +121,8 @@ export class FileService {
    * @param uuid - hash id of the file
    * @returns read access signed url
    */
-  async getReadSignedUrl(uuid: string): Promise<ReadSignedUrlResult> {
-    const file = await this.fileRepository.findByUuid(uuid, ['template']);
+  async getReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
+    const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
 
     let bucketType = BucketType.STANDARD;
 
@@ -146,7 +149,16 @@ export class FileService {
       expiryTime,
     );
 
-    return { uuid, url: signedUrl };
+    const fileAccessEvent = new FileAccessedEvent();
+    fileAccessEvent.userId = data.userId;
+    fileAccessEvent.fileId = file.id;
+    fileAccessEvent.ip = data.ip;
+    fileAccessEvent.projectId = file.projectId;
+    fileAccessEvent.userAgent = data.userAgent;
+
+    this.eventEmitter.emit('file.accessed', fileAccessEvent);
+
+    return { uuid: data.uuid, url: signedUrl };
   }
 
   /**
@@ -217,18 +229,17 @@ export class FileService {
   /**
    * generate storage path for the file
    * @param baseStoragePath - Base Storage Path of the project
-   * @param slug - Slig
+   * @param slug - Slug
    * @param fileName - Name of the file to be uploaded with extension
    * @param referenceNumber - Reference number of the file request
    * @returns file storage path with extension
    */
   private generateStoragePath(
     baseStoragePath: string,
-    slug: number,
     fileName: string,
     referenceNumber: string,
   ): string {
-    return `${baseStoragePath}/${slug}/${referenceNumber}-${fileName}`;
+    return `${baseStoragePath}/${referenceNumber}/${fileName}`;
   }
 
   /**

@@ -1,5 +1,7 @@
-import { Get, Param, Put } from '@nestjs/common';
+import { Get, Param, Put, Req } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
+import { Request } from 'express';
+import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
 import { RegisterFileDTO } from '../dto/register-file-dto';
@@ -13,8 +15,16 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Get('uuid/:uuid')
-  getSignedUrl(@Param() params: any): Promise<ReadSignedUrlResult> {
-    return this.fileService.getReadSignedUrl(params.uuid);
+  getSignedUrl(
+    @Param() params: any,
+    @Req() request: Request,
+  ): Promise<ReadSignedUrlResult> {
+    const readFile = new ReadFileBo();
+    readFile.uuid = params.uuid;
+    readFile.ip = request.ip;
+    readFile.userAgent = request.headers['user-agent'];
+    readFile.userId = 1;
+    return this.fileService.getReadSignedUrl(readFile);
   }
 
   @Post()

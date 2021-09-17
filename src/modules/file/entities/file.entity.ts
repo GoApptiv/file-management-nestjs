@@ -1,13 +1,14 @@
 import { FileStatus } from 'src/shared/constants/file-status.enum';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Project } from 'src/modules/auth/entities/project.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { MimeType } from './mime-type.entity';
 import { Template } from './template.entity';
 
 @Entity('files')
 export class File extends AbstractEntity {
   @Column({ unique: true })
+  @Index()
   uuid: string;
 
   @Column()

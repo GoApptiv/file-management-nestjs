@@ -5,6 +5,7 @@ import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
         configService.typeOrmConfig,
       inject: [AppConfigService],
     }),
+    EventEmitterModule.forRoot(),
   ],
 })
 export class AppModule {}
