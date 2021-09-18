@@ -111,4 +111,18 @@ export class CloudStorageService {
   ): Promise<SetStorageClassResponse> {
     return await this.bucket.file(file).setStorageClass(BucketType.STANDARD);
   }
+
+  /**
+   * sets the directory storage class to standard
+   * @param file - File Path
+   * @returns void
+   */
+  async setDirectoryStorageClassToStandard(directory: string): Promise<void> {
+    const filePages = await this.bucket.getFiles({ directory });
+    filePages.forEach((files) =>
+      files.forEach((file) =>
+        this.bucket.file(file.name).setStorageClass(BucketType.STANDARD),
+      ),
+    );
+  }
 }

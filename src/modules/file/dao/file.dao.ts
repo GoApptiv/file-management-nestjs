@@ -12,6 +12,7 @@ export class FileDAO {
   templateId: number;
   mimeTypeId: number;
   projectId: number;
+  archivalDate: Date;
 
   constructor(partial: Partial<FileDAO> = {}) {
     Object.assign(this, partial);

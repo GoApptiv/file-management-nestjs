@@ -45,6 +45,7 @@ export class FileService {
 
     const uuid = this.generateUuid(data.referenceNumber, data.projectId);
     const templateForUuId = await this.fileRepository.findByUuid(uuid);
+    const archivalDate = moment().add(template.archiveAfterInD, 'days');
 
     if (templateForUuId !== undefined) {
       throw new DuplicateReferenceNumberException();
@@ -63,7 +64,7 @@ export class FileService {
         data.referenceNumber,
       );
 
-      const expiryTime = this.generateExpiryTime(template.linkExpiryTime);
+      const expiryTime = this.generateExpiryTime(template.linkExpiryTimeInS);
 
       const bucketConfig = await this.bucketConfigRepository.findByProjectId(
         data.projectId,
@@ -86,6 +87,7 @@ export class FileService {
         uuid,
         storagePath,
         template.id,
+        archivalDate.toDate(),
       );
 
       return {
@@ -122,7 +124,7 @@ export class FileService {
    */
   async getReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
     const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
-    const expiryTime = this.generateExpiryTime(file.template.linkExpiryTime);
+    const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
     const bucketConfig = await this.bucketConfigRepository.findByProjectId(
       file.projectId,
@@ -193,6 +195,7 @@ export class FileService {
    * @param uuid - generated uuid
    * @param storagePath - storage path
    * @param templateId - template id
+   * @param archivalDate - file archival date
    * @returns stored record data
    */
   private async storeFileUploadRequest(
@@ -200,6 +203,7 @@ export class FileService {
     uuid: string,
     storagePath: string,
     templateId: number,
+    archivalDate: Date,
   ): Promise<File> {
     const mimeType = await this.mimeTypeRepository.findByType(data.file.type);
 
@@ -214,6 +218,7 @@ export class FileService {
     file.projectId = data.projectId;
     file.mimeTypeId = mimeType.id;
     file.templateId = templateId;
+    file.archivalDate = archivalDate;
 
     return this.fileRepository.store(file);
   }
@@ -242,9 +247,9 @@ export class FileService {
       throw new InvalidFileException('File format not supported');
     }
 
-    if (fileSize > template.maxSize) {
+    if (fileSize > template.maxSizeInB) {
       throw new InvalidFileException(
-        `File size exceeded the maximum size ${template.maxSize}`,
+        `File size exceeded the maximum size ${template.maxSizeInB}`,
       );
     }
 

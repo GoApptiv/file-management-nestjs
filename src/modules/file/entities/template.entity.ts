@@ -26,15 +26,18 @@ export class Template extends AbstractEntity {
   project: Project;
 
   @Column({ unsigned: true, nullable: true })
-  minSize: number;
+  minSizeInB: number;
 
   @Column({ unsigned: true, nullable: true })
-  maxSize: number;
+  maxSizeInB: number;
 
   @Column({ unsigned: true })
-  linkExpiryTime: number;
+  linkExpiryTimeInS: number;
 
   @ManyToMany(() => MimeType, (mimeType) => mimeType.templates)
   @JoinTable({ name: 'template_mime_types' })
   mimeTypes: MimeType[];
+
+  @Column({ nullable: true, default: 30 })
+  archiveAfterInD: number;
 }

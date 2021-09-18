@@ -49,4 +49,7 @@ export class File extends AbstractEntity {
   @ManyToOne(() => Project, (project) => project.id)
   @JoinColumn({ name: 'project_id' })
   project: Project;
+
+  @Column({ nullable: true })
+  archivalDate: Date;
 }

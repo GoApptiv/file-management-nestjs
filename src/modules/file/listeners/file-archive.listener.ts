@@ -18,8 +18,6 @@ export class FileArchiveListener {
   async handleFileArchiveEvent(event: FileArchiveEvent) {
     const file = await this.fileRepository.findOne(event.id);
 
-    console.log(file);
-
     const bucketConfig = await this.bucketConfigRepository.findByProjectId(
       file.projectId,
     );
