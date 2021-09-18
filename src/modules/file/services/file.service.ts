@@ -10,7 +10,6 @@ import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
 import { BucketConfigRepository } from 'src/modules/auth/repositories/bucket-config.repository';
-import { BucketType } from 'src/shared/constants/bucket-type';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { DuplicateReferenceNumberException } from '../exceptions/duplicate-reference-number.exception';
 import { InvalidFileException } from '../exceptions/invalid-file.exception';
@@ -19,6 +18,8 @@ import { FileDAO } from '../dao/file.dao';
 import { EventEmitter2 } from 'eventemitter2';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { FileAccessedEvent } from '../events/file-accessed.event';
+import { ArchiveFileResult } from '../results/archive-file.result';
+import { FileArchiveEvent } from '../events/file-archive.event';
 
 @Injectable()
 export class FileService {
@@ -64,11 +65,9 @@ export class FileService {
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTime);
 
-      const bucketConfig =
-        await this.bucketConfigRepository.findByProjectIdAndType(
-          data.projectId,
-          BucketType.STANDARD,
-        );
+      const bucketConfig = await this.bucketConfigRepository.findByProjectId(
+        data.projectId,
+      );
 
       const storage = new CloudStorageService(
         bucketConfig.email,
@@ -123,20 +122,11 @@ export class FileService {
    */
   async getReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
     const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
-
-    let bucketType = BucketType.STANDARD;
-
-    if (file.isArchieved) {
-      bucketType = BucketType.ARCHIVE;
-    }
-
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTime);
 
-    const bucketConfig =
-      await this.bucketConfigRepository.findByProjectIdAndType(
-        file.projectId,
-        bucketType,
-      );
+    const bucketConfig = await this.bucketConfigRepository.findByProjectId(
+      file.projectId,
+    );
 
     const storage = new CloudStorageService(
       bucketConfig.email,
@@ -162,6 +152,40 @@ export class FileService {
   }
 
   /**
+   * Archive Directory
+   * @param uuid - uuid of the original file
+   */
+  async archiveDirectory(uuid: string): Promise<ArchiveFileResult> {
+    const file = await this.fileRepository.findByUuid(uuid);
+
+    if (file === undefined) {
+      throw new InvalidFileException('File does not exist');
+    }
+
+    if (
+      file.status !== FileStatus.UPLOADED &&
+      file.status !== FileStatus.PROCESSED
+    ) {
+      throw new InvalidFileException('File cannot be archived');
+    }
+
+    if (file.isArchived) {
+      throw new InvalidFileException('File already archived');
+    }
+
+    const archiveEvent = new FileArchiveEvent();
+    archiveEvent.id = file.id;
+    archiveEvent.isDirectory = true;
+
+    this.eventEmitter.emit('file.archive', archiveEvent);
+
+    return {
+      uuid,
+      processed: true,
+    };
+  }
+
+  /**
    * Store file request in the database
    * @param dto - register file request
    * @param projectId - id of the project
@@ -181,7 +205,7 @@ export class FileService {
     const file = new FileDAO();
     file.fileSize = data.file.size;
     file.uuid = uuid;
-    file.isArchieved = false;
+    file.isArchived = false;
     file.isUploaded = false;
     file.status = FileStatus.REQUESTED;
     file.storagePath = storagePath;

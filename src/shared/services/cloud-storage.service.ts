@@ -1,6 +1,12 @@
-import { Bucket, GetSignedUrlConfig, Storage } from '@google-cloud/storage';
+import {
+  Bucket,
+  GetSignedUrlConfig,
+  SetStorageClassResponse,
+  Storage,
+} from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
 import moment from 'moment';
+import { BucketType } from '../constants/bucket-type';
 
 @Injectable()
 export class CloudStorageService {
@@ -68,5 +74,41 @@ export class CloudStorageService {
     const [url] = await this.bucket.file(path).getSignedUrl(options);
 
     return url;
+  }
+
+  /**
+   * sets the storage class to archive which is of minimum duration 365 days
+   * @param file - File Path
+   * @returns bucket response
+   */
+  async setStorageClassToArchive(
+    file: string,
+  ): Promise<SetStorageClassResponse> {
+    return await this.bucket.file(file).setStorageClass(BucketType.ARCHIVE);
+  }
+
+  /**
+   * sets the directory storage class to archive which is of minimum duration 365 days
+   * @param file - File Path
+   * @returns void
+   */
+  async setDirectoryStorageClassToArchive(directory: string): Promise<void> {
+    const filePages = await this.bucket.getFiles({ directory });
+    filePages.forEach((files) =>
+      files.forEach((file) =>
+        this.bucket.file(file.name).setStorageClass(BucketType.ARCHIVE),
+      ),
+    );
+  }
+
+  /**
+   * sets the storage class to standard
+   * @param file - File Path
+   * @returns bucket response
+   */
+  async setStorageClassToStandard(
+    file: string,
+  ): Promise<SetStorageClassResponse> {
+    return await this.bucket.file(file).setStorageClass(BucketType.STANDARD);
   }
 }

@@ -4,6 +4,7 @@ import { BucketConfigRepository } from '../auth/repositories/bucket-config.repos
 import { ProjectRepository } from '../auth/repositories/project.repository';
 import { FileController } from './controllers/file.controller';
 import { FileAccessedListener } from './listeners/file-accessed.listener';
+import { FileArchiveListener } from './listeners/file-archive.listener';
 import { AccessLogRepository } from './repositories/access-log.repository';
 import { FileRepository } from './repositories/file.repository';
 import { MimeTypeRepository } from './repositories/mime-type.repository';
@@ -22,6 +23,6 @@ import { FileService } from './services/file.service';
     ]),
   ],
   controllers: [FileController],
-  providers: [FileService, FileAccessedListener],
+  providers: [FileService, FileAccessedListener, FileArchiveListener],
 })
 export class FileModule {}

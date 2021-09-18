@@ -31,7 +31,7 @@ export class File extends AbstractEntity {
   isUploaded: boolean;
 
   @Column()
-  isArchieved: boolean;
+  isArchived: boolean;
 
   @Column({ unsigned: true })
   fileSize: number;

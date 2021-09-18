@@ -7,7 +7,7 @@ export class FileDAO {
   status: FileStatus;
   storagePath: string;
   isUploaded: boolean;
-  isArchieved: boolean;
+  isArchived: boolean;
   fileSize: number;
   templateId: number;
   mimeTypeId: number;

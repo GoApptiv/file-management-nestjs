@@ -3,8 +3,10 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { Request } from 'express';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
+import { ArchiveFileDTO } from '../dto/archive-file.dto';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
 import { RegisterFileDTO } from '../dto/register-file-dto';
+import { ArchiveFileResult } from '../results/archive-file.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
@@ -37,5 +39,10 @@ export class FileController {
   @Put('confirm')
   confirm(@Body() dto: ConfirmFileUploadedDTO): Promise<ConfirmUploadResult> {
     return this.fileService.confirmUpload(dto.uuid);
+  }
+
+  @Put('archive')
+  archive(@Body() dto: ArchiveFileDTO): Promise<ArchiveFileResult> {
+    return this.fileService.archiveDirectory(dto.uuid);
   }
 }

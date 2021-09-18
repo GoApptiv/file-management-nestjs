@@ -1,5 +1,4 @@
 import { Exclude } from 'class-transformer';
-import { BucketType } from 'src/shared/constants/bucket-type';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Project } from './project.entity';
@@ -15,9 +14,6 @@ export class BucketConfig extends AbstractEntity {
   @Exclude()
   @Column({ type: 'longtext' })
   key: string;
-
-  @Column()
-  type: BucketType;
 
   @Column()
   projectId: number;
