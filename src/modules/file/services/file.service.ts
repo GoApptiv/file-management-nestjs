@@ -124,6 +124,11 @@ export class FileService {
    */
   async getReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
     const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
+
+    if (file === undefined || file.isUploaded === false) {
+      throw new InvalidFileException('File does not exist');
+    }
+
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
     const bucketConfig = await this.bucketConfigRepository.findByProjectId(

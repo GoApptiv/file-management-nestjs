@@ -1,4 +1,8 @@
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
 import * as helmet from 'helmet';
@@ -11,9 +15,16 @@ import { RestResponseService } from './shared/services/rest-response.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
+  // add global prefix in uri
   app.setGlobalPrefix('api');
 
+  // enable versioning example https://filestorage.com/v1/route
+  app.enableVersioning();
+
+  // custom bad request filter to modify to generalise response format
   app.useGlobalFilters(new BadRequestExceptionFilter());
+
+  // transforms validation error to generalised format
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (validationErrors: ValidationError[] = []) => {

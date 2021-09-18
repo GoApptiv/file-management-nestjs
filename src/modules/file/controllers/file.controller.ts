@@ -12,7 +12,10 @@ import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
 import { FileService } from '../services/file.service';
 
-@Controller('file')
+@Controller({
+  path: 'file',
+  version: '1',
+})
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
