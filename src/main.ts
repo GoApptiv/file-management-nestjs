@@ -1,9 +1,7 @@
-import {
-  BadRequestException,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import * as basicAuth from 'express-basic-auth';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationError } from 'class-validator';
 import * as helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -38,6 +36,31 @@ async function bootstrap() {
   app.use(helmet());
 
   const configService = app.select(AppConfigModule).get(AppConfigService);
+
+  // basic auth for swagger docs
+  app.use(
+    ['/api', '/api-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [configService.swaggerAuth.userName]:
+          configService.swaggerAuth.password,
+      },
+    }),
+  );
+
+  // swagger configs
+  const config = new DocumentBuilder()
+    .setTitle(configService.appConfig.name)
+    .setDescription(configService.appConfig.description)
+    .setContact(
+      configService.appConfig.maintainer,
+      configService.appConfig.url,
+      configService.appConfig.supportEmail,
+    )
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   const port = configService.appConfig.port;
   await app.listen(port);

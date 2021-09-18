@@ -55,7 +55,19 @@ export class AppConfigService {
 
   get appConfig() {
     return {
+      name: this.getString('APP_NAME'),
+      description: this.getString('APP_DESCRIPTION'),
+      maintainer: this.getString('APP_MAINTAINER'),
+      url: this.getString('APP_URL'),
+      supportEmail: this.getString('APP_SUPPORT_EMAIL'),
       port: this.getString('APP_PORT'),
+    };
+  }
+
+  get swaggerAuth() {
+    return {
+      userName: this.getString('SWAGGER_USERNAME'),
+      password: this.getString('SWAGGER_PASSWORD'),
     };
   }
 
