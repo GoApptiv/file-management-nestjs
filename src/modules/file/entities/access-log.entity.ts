@@ -18,4 +18,7 @@ export class AccessLog extends AbstractEntity {
 
   @Column()
   userAgent: string;
+
+  @Column()
+  isArchived: boolean;
 }

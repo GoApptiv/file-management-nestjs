@@ -145,6 +145,7 @@ export class FileService {
     fileAccessEvent.ip = data.ip;
     fileAccessEvent.projectId = file.projectId;
     fileAccessEvent.userAgent = data.userAgent;
+    fileAccessEvent.isArchived = file.isArchived;
 
     this.eventEmitter.emit('file.accessed', fileAccessEvent);
 

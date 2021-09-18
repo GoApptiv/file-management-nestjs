@@ -4,4 +4,5 @@ export class FileAccessedEvent {
   projectId: number;
   ip: string;
   userAgent: string;
+  isArchived: boolean;
 }

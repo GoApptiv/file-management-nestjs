@@ -4,6 +4,7 @@ export class AccessLogDAO {
   projectId: number;
   ip: string;
   userAgent: string;
+  isArchived: boolean;
 
   constructor(partial: Partial<AccessLogDAO> = {}) {
     Object.assign(this, partial);
