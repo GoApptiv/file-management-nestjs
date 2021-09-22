@@ -13,11 +13,11 @@ export class createProjectsTable1630750048488 implements MigrationInterface {
           },
           {
             name: 'name',
-            type: 'string',
+            type: 'varchar',
           },
           {
             name: 'code',
-            type: 'string',
+            type: 'varchar',
             isNullable: false,
             isUnique: true,
           },
