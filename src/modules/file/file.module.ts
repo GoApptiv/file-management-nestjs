@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BucketConfigRepository } from '../auth/repositories/bucket-config.repository';
 import { ProjectRepository } from '../auth/repositories/project.repository';
 import { FileController } from './controllers/file.controller';
+import { BulkFileAccessedListener } from './listeners/bulk-file-accessed.listener';
 import { FileAccessedListener } from './listeners/file-accessed.listener';
 import { FileArchiveListener } from './listeners/file-archive.listener';
 import { AccessLogRepository } from './repositories/access-log.repository';
@@ -23,6 +24,11 @@ import { FileService } from './services/file.service';
     ]),
   ],
   controllers: [FileController],
-  providers: [FileService, FileAccessedListener, FileArchiveListener],
+  providers: [
+    FileService,
+    FileAccessedListener,
+    FileArchiveListener,
+    BulkFileAccessedListener,
+  ],
 })
 export class FileModule {}

@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { getConnection, InsertResult, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
 import { AccessLogDAO } from '../dao/access-log.dao';
 import { AccessLog } from '../entities/access-log.entity';
@@ -10,5 +10,14 @@ export class AccessLogRepository extends Repository<AccessLog> {
    */
   async store(data: AccessLogDAO): Promise<AccessLog> {
     return await this.save(data);
+  }
+
+  async bulkStore(data: AccessLogDAO[]): Promise<InsertResult> {
+    return await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(AccessLog)
+      .values(data)
+      .execute();
   }
 }

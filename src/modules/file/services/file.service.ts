@@ -20,6 +20,7 @@ import { ReadFileBo } from '../bo/read-file.bo';
 import { FileAccessedEvent } from '../events/file-accessed.event';
 import { ArchiveFileResult } from '../results/archive-file.result';
 import { FileArchiveEvent } from '../events/file-archive.event';
+import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 
 @Injectable()
 export class FileService {
@@ -36,7 +37,7 @@ export class FileService {
    * @param data - Register file request
    * @returns signed url and uuid
    */
-  async getUploadSignedUrl(
+  async generateUploadSignedUrl(
     data: RegisterFileBO,
   ): Promise<WriteSignedUrlResult> {
     const template = await this.templateRepository.findByCode(
@@ -66,15 +67,7 @@ export class FileService {
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTimeInS);
 
-      const bucketConfig = await this.bucketConfigRepository.findByProjectId(
-        data.projectId,
-      );
-
-      const storage = new CloudStorageService(
-        bucketConfig.email,
-        UtilsService.base64decodeKey(bucketConfig.key),
-        bucketConfig.name,
-      );
+      const storage = await this.getCloudStorage(data.projectId);
 
       const signedUrl = await storage.generateUploadSignedUrl(
         storagePath,
@@ -122,7 +115,7 @@ export class FileService {
    * @param uuid - hash id of the file
    * @returns read access signed url
    */
-  async getReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
+  async generateReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
     const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
 
     if (file === undefined || file.isUploaded === false) {
@@ -131,15 +124,7 @@ export class FileService {
 
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
-    const bucketConfig = await this.bucketConfigRepository.findByProjectId(
-      file.projectId,
-    );
-
-    const storage = new CloudStorageService(
-      bucketConfig.email,
-      UtilsService.base64decodeKey(bucketConfig.key),
-      bucketConfig.name,
-    );
+    const storage = await this.getCloudStorage(file.projectId);
 
     const signedUrl = await storage.generateReadSignedUrl(
       file.storagePath,
@@ -157,6 +142,53 @@ export class FileService {
     this.eventEmitter.emit('file.accessed', fileAccessEvent);
 
     return { uuid: data.uuid, url: signedUrl };
+  }
+
+  /**
+   * generates bulk read signed urls
+   * @param data - Bulk Read url data
+   * @param projectId - Project id
+   * @returns arrays of signed urls and uuid
+   */
+  async bulkGenerateReadSignedUrl(data: BulkReadFileBo, projectId: number) {
+    const signedUrls: ReadSignedUrlResult[] = [];
+    const uuids = data.uuids;
+    const fileAccessEvents: FileAccessedEvent[] = [];
+
+    const storage = await this.getCloudStorage(projectId);
+
+    const files = await this.fileRepository.fetchByUuids(uuids, ['template']);
+
+    for (const file of files) {
+      if (file.isUploaded) {
+        const expiryTime = this.generateExpiryTime(
+          file.template.linkExpiryTimeInS,
+        );
+
+        const signedUrl = await storage.generateReadSignedUrl(
+          file.storagePath,
+          expiryTime,
+        );
+
+        signedUrls.push({
+          uuid: file.uuid,
+          url: signedUrl,
+        });
+
+        fileAccessEvents.push({
+          userId: data.userId,
+          fileId: file.id,
+          projectId: projectId,
+          ip: data.ip,
+          userAgent: data.userAgent,
+          isArchived: file.isArchived,
+        });
+      }
+    }
+
+    this.eventEmitter.emit('bulk-file.accessed', fileAccessEvents);
+
+    return { urls: signedUrls };
   }
 
   /**
@@ -294,5 +326,24 @@ export class FileService {
    */
   private generateUuid(referenceNumber: string, projectId: number): string {
     return UtilsService.generateHash(`${referenceNumber}_${projectId}`, 'sha1');
+  }
+
+  /**
+   * Initialize the storage for the project id
+   * @param projectId
+   * @returns cloud storage service object for the project bucket
+   */
+  private async getCloudStorage(
+    projectId: number,
+  ): Promise<CloudStorageService> {
+    const bucketConfig = await this.bucketConfigRepository.findByProjectId(
+      projectId,
+    );
+
+    return new CloudStorageService(
+      bucketConfig.email,
+      UtilsService.base64decodeKey(bucketConfig.key),
+      bucketConfig.name,
+    );
   }
 }

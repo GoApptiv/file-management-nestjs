@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
 import { FileDAO } from '../dao/file.dao';
 import { File } from '../entities/file.entity';
@@ -17,6 +17,18 @@ export class FileRepository extends Repository<File> {
    */
   async findByUuid(uuid: string, relations?: string[]): Promise<File> {
     return await this.findOne({ where: { uuid }, relations: relations });
+  }
+
+  /**
+   * Fetch entity which matches the uuids
+   */
+  async fetchByUuids(uuids: [], relations?: string[]): Promise<File[]> {
+    return await this.find({
+      where: {
+        uuid: In(uuids),
+      },
+      relations: relations,
+    });
   }
 
   /**

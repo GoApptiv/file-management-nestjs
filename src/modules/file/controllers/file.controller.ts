@@ -1,23 +1,23 @@
-import { Get, Param, Put, Req } from '@nestjs/common';
+import { Get, HttpCode, Param, Put, Req } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
+import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
 import { ArchiveFileDTO } from '../dto/archive-file.dto';
+import { BulkReadFileDTO } from '../dto/bulk-read-file.dto';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
 import { RegisterFileDTO } from '../dto/register-file-dto';
-import { File } from '../entities/file.entity';
 import { ArchiveFileResult } from '../results/archive-file.result';
+import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
@@ -46,7 +46,7 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  getSignedUrl(
+  getReadUrl(
     @Param() params: any,
     @Req() request: Request,
   ): Promise<ReadSignedUrlResult> {
@@ -55,7 +55,30 @@ export class FileController {
     readFile.ip = request.ip;
     readFile.userAgent = request.headers['user-agent'];
     readFile.userId = 1;
-    return this.fileService.getReadSignedUrl(readFile);
+    return this.fileService.generateReadSignedUrl(readFile);
+  }
+
+  @HttpCode(200)
+  @Post('bulk/uuid')
+  @ApiOperation({
+    summary: 'File read url bulk',
+    description: 'Generates read signed url for array of uuids',
+  })
+  @ApiOkResponse({
+    description: 'Signed url',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
+  getBulkReadUrl(
+    @Body() dto: BulkReadFileDTO,
+    @Req() request: Request,
+  ): Promise<BulkReadSignedUrlResult> {
+    const data = new BulkReadFileBo(dto);
+    data.ip = request.ip;
+    data.userAgent = request.headers['user-agent'];
+    data.userId = 1;
+    return this.fileService.bulkGenerateReadSignedUrl(data, 1);
   }
 
   @Post()
@@ -73,7 +96,7 @@ export class FileController {
   getUploadUrl(@Body() dto: RegisterFileDTO): Promise<WriteSignedUrlResult> {
     const registerFile = new RegisterFileBO(dto);
     registerFile.projectId = 1;
-    return this.fileService.getUploadSignedUrl(registerFile);
+    return this.fileService.generateUploadSignedUrl(registerFile);
   }
 
   @ApiOperation({

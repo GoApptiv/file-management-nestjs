@@ -38,16 +38,16 @@ async function bootstrap() {
   const configService = app.select(AppConfigModule).get(AppConfigService);
 
   // basic auth for swagger docs
-  app.use(
-    ['/api', '/api-json'],
-    basicAuth({
-      challenge: true,
-      users: {
-        [configService.swaggerAuth.userName]:
-          configService.swaggerAuth.password,
-      },
-    }),
-  );
+  // app.use(
+  //   ['/api', '/api-json'],
+  //   basicAuth({
+  //     challenge: true,
+  //     users: {
+  //       [configService.swaggerAuth.userName]:
+  //         configService.swaggerAuth.password,
+  //     },
+  //   }),
+  // );
 
   // swagger configs
   const config = new DocumentBuilder()
