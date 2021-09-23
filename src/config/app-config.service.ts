@@ -84,4 +84,8 @@ export class AppConfigService {
       namingStrategy: new SnakeNamingStrategy(),
     };
   }
+
+  get jwtSecret(): string {
+    return this.getString('JWT_TOKEN_SECRET');
+  }
 }

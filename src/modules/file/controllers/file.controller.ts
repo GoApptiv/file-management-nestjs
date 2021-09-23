@@ -1,4 +1,12 @@
-import { Get, HttpCode, Param, Put, Req } from '@nestjs/common';
+import {
+  Get,
+  HttpCode,
+  Param,
+  Put,
+  Req,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -8,7 +16,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { RealIP } from 'nestjs-real-ip';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
@@ -32,6 +41,7 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Get('uuid/:uuid')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'File read url',
     description: 'Generates read signed url',
@@ -49,17 +59,19 @@ export class FileController {
   getReadUrl(
     @Param() params: any,
     @Req() request: Request,
+    @RealIP() ip: string,
   ): Promise<ReadSignedUrlResult> {
     const readFile = new ReadFileBo();
     readFile.uuid = params.uuid;
-    readFile.ip = request.ip;
+    readFile.ip = ip;
     readFile.userAgent = request.headers['user-agent'];
-    readFile.userId = 1;
+    readFile.userId = request['user'].userId;
     return this.fileService.generateReadSignedUrl(readFile);
   }
 
-  @HttpCode(200)
   @Post('bulk/uuid')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
   @ApiOperation({
     summary: 'File read url bulk',
     description: 'Generates read signed url for array of uuids',
@@ -73,15 +85,17 @@ export class FileController {
   getBulkReadUrl(
     @Body() dto: BulkReadFileDTO,
     @Req() request: Request,
+    @RealIP() ip: string,
   ): Promise<BulkReadSignedUrlResult> {
     const data = new BulkReadFileBo(dto);
-    data.ip = request.ip;
+    data.ip = ip;
     data.userAgent = request.headers['user-agent'];
-    data.userId = 1;
+    data.userId = request['user'].userId;
     return this.fileService.bulkGenerateReadSignedUrl(data, 1);
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Upload url',
     description:
@@ -93,12 +107,17 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  getUploadUrl(@Body() dto: RegisterFileDTO): Promise<WriteSignedUrlResult> {
+  getUploadUrl(
+    @Body() dto: RegisterFileDTO,
+    @Req() request: Request,
+  ): Promise<WriteSignedUrlResult> {
     const registerFile = new RegisterFileBO(dto);
-    registerFile.projectId = 1;
+    registerFile.projectId = request['user'].projectId;
     return this.fileService.generateUploadSignedUrl(registerFile);
   }
 
+  @Put('confirm')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Confirm file uploaded',
     description: 'Confirm the file uploaded in the signed url',
@@ -109,11 +128,12 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  @Put('confirm')
   confirm(@Body() dto: ConfirmFileUploadedDTO): Promise<ConfirmUploadResult> {
     return this.fileService.confirmUpload(dto.uuid);
   }
 
+  @Put('archive')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Archive uploaded file',
     description: 'Archive the uploaded file',
@@ -124,7 +144,6 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  @Put('archive')
   archive(@Body() dto: ArchiveFileDTO): Promise<ArchiveFileResult> {
     return this.fileService.archiveDirectory(dto.uuid);
   }
