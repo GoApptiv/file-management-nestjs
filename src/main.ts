@@ -19,9 +19,6 @@ async function bootstrap() {
   // enable versioning example https://filestorage.com/v1/route
   app.enableVersioning();
 
-  // custom bad request filter to modify to generalise response format
-  app.useGlobalFilters(new BadRequestExceptionFilter());
-
   // transforms validation error to generalised format
   app.useGlobalPipes(
     new ValidationPipe({
@@ -33,21 +30,24 @@ async function bootstrap() {
     }),
   );
 
+  // custom bad request filter to modify to generalise response format
+  app.useGlobalFilters(new BadRequestExceptionFilter());
+
   app.use(helmet());
 
   const configService = app.select(AppConfigModule).get(AppConfigService);
 
   // basic auth for swagger docs
-  // app.use(
-  //   ['/api', '/api-json'],
-  //   basicAuth({
-  //     challenge: true,
-  //     users: {
-  //       [configService.swaggerAuth.userName]:
-  //         configService.swaggerAuth.password,
-  //     },
-  //   }),
-  // );
+  app.use(
+    ['/api', '/api-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [configService.swaggerAuth.userName]:
+          configService.swaggerAuth.password,
+      },
+    }),
+  );
 
   // swagger configs
   const config = new DocumentBuilder()

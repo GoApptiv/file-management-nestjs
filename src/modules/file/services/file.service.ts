@@ -53,7 +53,7 @@ export class FileService {
     }
 
     if (
-      this.isFileValidForTemplate(
+      await this.isFileValidForTemplate(
         data.templateCode,
         data.file.size,
         data.file.type,
