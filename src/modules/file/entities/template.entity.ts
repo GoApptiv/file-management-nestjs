@@ -21,8 +21,11 @@ export class Template extends AbstractEntity {
   @Column()
   baseStoragePath: string;
 
+  @Column()
+  projectId: number;
+
   @ManyToOne(() => Project, (project) => project.id)
-  @JoinColumn()
+  @JoinColumn({ name: 'project_id' })
   project: Project;
 
   @Column({ unsigned: true, nullable: true })

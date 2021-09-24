@@ -1,25 +1,30 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createProjectsTable1630750048488 implements MigrationInterface {
+export class MimeTypes1632392902369 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'projects',
+        name: 'mime_types',
         columns: [
           {
             name: 'id',
             type: 'int',
             isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
           },
           {
             name: 'name',
             type: 'varchar',
           },
           {
-            name: 'code',
+            name: 'type',
             type: 'varchar',
-            isNullable: false,
             isUnique: true,
+          },
+          {
+            name: 'extension',
+            type: 'varchar',
           },
           {
             name: 'created_at',
@@ -30,6 +35,7 @@ export class createProjectsTable1630750048488 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
+            onUpdate: 'now()',
           },
         ],
       }),
@@ -37,6 +43,6 @@ export class createProjectsTable1630750048488 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('projects');
+    await queryRunner.dropTable('mime_types');
   }
 }
