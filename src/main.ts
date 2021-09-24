@@ -39,7 +39,7 @@ async function bootstrap() {
 
   // basic auth for swagger docs
   app.use(
-    ['/api', '/api-json'],
+    ['/doc', '/doc-json'],
     basicAuth({
       challenge: true,
       users: {
@@ -60,7 +60,7 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('doc', app, document);
 
   const port = configService.appConfig.port;
   await app.listen(port);

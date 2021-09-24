@@ -1,0 +1,10 @@
+nodejs:
+  build: ./
+  container_name: nodejs
+  restart: unless-stopped
+  volumes:
+    - .:/usr/src/app
+    - /usr/src/app/node_modules
+  ports:
+    - 80:80
+  command: npm run start

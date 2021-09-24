@@ -14,10 +14,12 @@ export class TemplateMimeTypes1632393088629 implements MigrationInterface {
           {
             name: 'templates_id',
             type: 'int',
+            isPrimary: true,
           },
           {
             name: 'mime_types_id',
             type: 'int',
+            isPrimary: true,
           },
         ],
       }),
