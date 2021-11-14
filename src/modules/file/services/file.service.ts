@@ -21,6 +21,7 @@ import { FileAccessedEvent } from '../events/file-accessed.event';
 import { ArchiveFileResult } from '../results/archive-file.result';
 import { FileArchiveEvent } from '../events/file-archive.event';
 import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
+import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 
 @Injectable()
 export class FileService {
@@ -42,6 +43,7 @@ export class FileService {
   ): Promise<WriteSignedUrlResult> {
     const template = await this.templateRepository.findByCode(
       data.templateCode,
+      ['bucketConfig'],
     );
 
     const uuid = this.generateUuid(data.referenceNumber, data.projectId);
@@ -67,7 +69,7 @@ export class FileService {
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTimeInS);
 
-      const storage = await this.getCloudStorage(data.projectId);
+      const storage = await this.getCloudStorage(template.bucketConfig);
 
       const signedUrl = await storage.generateUploadSignedUrl(
         storagePath,
@@ -116,7 +118,10 @@ export class FileService {
    * @returns read access signed url
    */
   async generateReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
-    const file = await this.fileRepository.findByUuid(data.uuid, ['template']);
+    const file = await this.fileRepository.findByUuid(data.uuid, [
+      'template',
+      'template.bucketConfig',
+    ]);
 
     if (file === undefined || file.isUploaded === false) {
       throw new InvalidFileException('File does not exist');
@@ -124,7 +129,7 @@ export class FileService {
 
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
-    const storage = await this.getCloudStorage(file.projectId);
+    const storage = await this.getCloudStorage(file.template.bucketConfig);
 
     const signedUrl = await storage.generateReadSignedUrl(
       file.storagePath,
@@ -155,15 +160,18 @@ export class FileService {
     const uuids = data.uuids;
     const fileAccessEvents: FileAccessedEvent[] = [];
 
-    const storage = await this.getCloudStorage(projectId);
-
-    const files = await this.fileRepository.fetchByUuids(uuids, ['template']);
+    const files = await this.fileRepository.fetchByUuids(uuids, [
+      'template',
+      'template.bucketConfig',
+    ]);
 
     for (const file of files) {
       if (file.isUploaded) {
         const expiryTime = this.generateExpiryTime(
           file.template.linkExpiryTimeInS,
         );
+
+        const storage = await this.getCloudStorage(file.template.bucketConfig);
 
         const signedUrl = await storage.generateReadSignedUrl(
           file.storagePath,
@@ -329,17 +337,13 @@ export class FileService {
   }
 
   /**
-   * Initialize the storage for the project id
-   * @param projectId
-   * @returns cloud storage service object for the project bucket
+   * Initialize the storage for the bucket config
+   * @param bucketConfig
+   * @returns cloud storage service object for the template bucket
    */
   private async getCloudStorage(
-    projectId: number,
+    bucketConfig: BucketConfig,
   ): Promise<CloudStorageService> {
-    const bucketConfig = await this.bucketConfigRepository.findByProjectId(
-      projectId,
-    );
-
     return new CloudStorageService(
       bucketConfig.email,
       UtilsService.base64decodeKey(bucketConfig.key),

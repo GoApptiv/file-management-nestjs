@@ -9,6 +9,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { MimeType } from './mime-type.entity';
+import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 
 @Entity('templates')
 export class Template extends AbstractEntity {
@@ -43,4 +44,11 @@ export class Template extends AbstractEntity {
 
   @Column({ nullable: true, default: 30 })
   archiveAfterInD: number;
+
+  @Column()
+  bucketConfigId: number;
+
+  @ManyToOne(() => BucketConfig, (bucketConfig) => bucketConfig.id)
+  @JoinColumn({ name: 'bucket_config_id' })
+  bucketConfig: BucketConfig;
 }
