@@ -4,10 +4,6 @@ export class RemoveProjectIdFromBucketConfigTable1636908825223
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE bucket_configs DROP COLUMN project_id`,
-    );
-
     const table = await queryRunner.getTable('bucket_configs');
 
     const projectIdforeignKey = table.foreignKeys.find(
@@ -15,6 +11,10 @@ export class RemoveProjectIdFromBucketConfigTable1636908825223
     );
 
     await queryRunner.dropForeignKey('bucket_configs', projectIdforeignKey);
+
+    await queryRunner.query(
+      `ALTER TABLE bucket_configs DROP COLUMN project_id`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
