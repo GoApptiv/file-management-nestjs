@@ -1,10 +1,10 @@
 # File Storage Service
 
-File storage service is NestJS Microservice build to securely store your files to the Google Cloud bucket.
+File storage service is Microservice build to securely store your files to the Google Cloud bucket.
 
 ## Installation
 
-File storage service is build using NestJS, make sure you have the necessary command lines tools installed for NestJS.
+File Storage Service is written in TypeScript and NodeJS, using MySQL as its primary database, make sure you have the necessary command lines tools installed for NestJS.
 
 [Please refer to NestJS CLI for more details](https://docs.nestjs.com/cli/overview)
 
@@ -24,7 +24,7 @@ npm run build
 
 ### Step 3: Configure the environment file
 
-Please refer to the .env.sample.json for sample file and create .env file with the necessary configuration.
+Please refer to the .env.sample for sample file and create .env file with the necessary configuration.
 
 ## Database Migration
 
