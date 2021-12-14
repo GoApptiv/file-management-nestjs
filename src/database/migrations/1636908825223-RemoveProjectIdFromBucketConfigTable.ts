@@ -19,7 +19,7 @@ export class RemoveProjectIdFromBucketConfigTable1636908825223
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE templates ADD project_id int NOT NULL`,
+      `ALTER TABLE bucket_configs ADD project_id int NOT NULL`,
     );
 
     await queryRunner.createForeignKey(

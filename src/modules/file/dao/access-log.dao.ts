@@ -1,5 +1,4 @@
 export class AccessLogDAO {
-  userId: number;
   fileId: number;
   projectId: number;
   ip: string;

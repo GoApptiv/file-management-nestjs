@@ -137,7 +137,6 @@ export class FileService {
     );
 
     const fileAccessEvent = new FileAccessedEvent();
-    fileAccessEvent.userId = data.userId;
     fileAccessEvent.fileId = file.id;
     fileAccessEvent.ip = data.ip;
     fileAccessEvent.projectId = file.projectId;
@@ -184,7 +183,6 @@ export class FileService {
         });
 
         fileAccessEvents.push({
-          userId: data.userId,
           fileId: file.id,
           projectId: projectId,
           ip: data.ip,

@@ -4,9 +4,6 @@ import { Column, Entity, Index } from 'typeorm';
 @Entity('access_logs')
 export class AccessLog extends AbstractEntity {
   @Column()
-  userId: number;
-
-  @Column()
   @Index()
   fileId: number;
 

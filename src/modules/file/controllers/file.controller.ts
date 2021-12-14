@@ -65,7 +65,6 @@ export class FileController {
     readFile.uuid = params.uuid;
     readFile.ip = ip;
     readFile.userAgent = request.headers['user-agent'];
-    readFile.userId = request['user'].userId;
     return this.fileService.generateReadSignedUrl(readFile);
   }
 
@@ -90,7 +89,6 @@ export class FileController {
     const data = new BulkReadFileBo(dto);
     data.ip = ip;
     data.userAgent = request.headers['user-agent'];
-    data.userId = request['user'].userId;
     return this.fileService.bulkGenerateReadSignedUrl(data, 1);
   }
 

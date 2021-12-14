@@ -21,7 +21,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const project = await this.projectRepository.findByCode(payload.app_code);
 
     return {
-      userId: payload.user_id,
       projectCode: payload.app_code,
       projectId: project.id,
     };
