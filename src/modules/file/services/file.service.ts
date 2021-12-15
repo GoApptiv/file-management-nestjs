@@ -22,6 +22,7 @@ import { ArchiveFileResult } from '../results/archive-file.result';
 import { FileArchiveEvent } from '../events/file-archive.event';
 import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
+import { InvalidTemplateException } from '../exceptions/invalid-template.exception';
 
 @Injectable()
 export class FileService {
@@ -45,6 +46,10 @@ export class FileService {
       data.templateCode,
       ['bucketConfig'],
     );
+
+    if (template === undefined) {
+      throw new InvalidTemplateException();
+    }
 
     const uuid = this.generateUuid(data.referenceNumber, data.projectId);
     const templateForUuId = await this.fileRepository.findByUuid(uuid);
