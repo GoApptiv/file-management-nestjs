@@ -18,10 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const project = await this.projectRepository.findByCode(payload.app_code);
+    const project = await this.projectRepository.findByCode(payload.username);
 
     return {
-      projectCode: payload.app_code,
+      projectCode: payload.username,
       projectId: project.id,
     };
   }
