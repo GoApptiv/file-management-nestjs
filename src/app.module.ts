@@ -11,6 +11,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   imports: [
     FileModule,
     AuthModule,
+    AppConfigModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

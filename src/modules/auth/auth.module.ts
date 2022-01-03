@@ -11,7 +11,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    AppConfigModule,
     TypeOrmModule.forFeature([ProjectRepository, BucketConfig]),
     PassportModule,
     JwtModule.register({
