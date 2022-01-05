@@ -4,7 +4,7 @@ import {
   Catch,
   ExceptionFilter,
 } from '@nestjs/common';
-import { RestResponseService } from '../services/rest-response.service';
+import { RestResponse } from '../services/rest-response.service';
 
 @Catch(BadRequestException)
 export class BadRequestExceptionFilter implements ExceptionFilter {
@@ -15,12 +15,6 @@ export class BadRequestExceptionFilter implements ExceptionFilter {
 
     res
       .status(status)
-      .json(
-        RestResponseService.buildResponseError(
-          status,
-          exception.message,
-          exception.getResponse(),
-        ),
-      );
+      .json(RestResponse.error(exception.message, exception.getResponse()));
   }
 }

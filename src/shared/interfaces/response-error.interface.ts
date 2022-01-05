@@ -1,6 +1,6 @@
 export interface ResponseError {
-  status: number;
+  success: boolean;
   message: string;
   errors: string | Record<string, any>;
-  timestamp: string;
+  timestamp: number;
 }

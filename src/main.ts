@@ -8,7 +8,7 @@ import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 import { BadRequestExceptionFilter } from './shared/filters/bad-request-exceptions.filter';
-import { RestResponseService } from './shared/services/rest-response.service';
+import { RestResponse } from './shared/services/rest-response.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -24,7 +24,7 @@ async function bootstrap() {
     new ValidationPipe({
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         return new BadRequestException(
-          RestResponseService.transformValidationError(validationErrors),
+          RestResponse.transformValidationError(validationErrors),
         );
       },
     }),

@@ -1,24 +1,36 @@
 import { ValidationError } from 'class-validator';
 import { ResponseError } from '../interfaces/response-error.interface';
+import { ResponseSuccess } from '../interfaces/response-success.interface';
 
-export class RestResponseService {
+export class RestResponse {
+  /**
+   * build success response
+   * @param data - data object
+   * @returns Response Success
+   */
+  static success(data: Record<string, any> | string): ResponseSuccess {
+    return {
+      success: true,
+      data,
+      timestamp: Date.now(),
+    };
+  }
+
   /**
    * build response error
-   * @param status - http status code
    * @param message - message
    * @param errors - error message
    * @returns Response error
    */
-  static buildResponseError(
-    status: number,
+  static error(
     message: string,
     errors: Record<string, any> | string,
   ): ResponseError {
     return {
-      status,
+      success: false,
       message,
       errors,
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
     };
   }
 
