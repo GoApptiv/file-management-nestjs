@@ -33,7 +33,13 @@ File storage service uses MySQL database. To run the migrations create a ormconf
 Run the following command to run migrations.
 
 ```cmd
-npx typeorm migration:run
+npm run migration:run
+```
+
+Run the following command to create new migrations.
+
+```cmd
+npm run migration:generate MigrationName
 ```
 
 ## Usage
