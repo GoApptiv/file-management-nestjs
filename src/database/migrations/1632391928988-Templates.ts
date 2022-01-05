@@ -59,6 +59,11 @@ export class Templates1632391928988 implements MigrationInterface {
             default: 30,
           },
           {
+            name: 'bucket_config_id',
+            type: 'int',
+            unsigned: true,
+          },
+          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()',
@@ -81,15 +86,29 @@ export class Templates1632391928988 implements MigrationInterface {
         referencedTableName: 'projects',
       }),
     );
+
+    await queryRunner.createForeignKey(
+      'templates',
+      new TableForeignKey({
+        columnNames: ['bucket_config_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'bucket_configs',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable('templates');
-    const foreignKey = table.foreignKeys.find(
+    const projectForeignKey = table.foreignKeys.find(
       (fk) => fk.columnNames.indexOf('project_id') !== -1,
     );
 
-    await queryRunner.dropForeignKey('templates', foreignKey);
+    const bucketConfigForeignKey = table.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('bucket_config_id') !== -1,
+    );
+
+    await queryRunner.dropForeignKey('templates', projectForeignKey);
+    await queryRunner.dropForeignKey('templates', bucketConfigForeignKey);
 
     await queryRunner.dropTable('templates');
   }
