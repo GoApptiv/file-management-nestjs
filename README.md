@@ -28,7 +28,7 @@ Please refer to the .env.sample for sample file and create .env file with the ne
 
 ## Database Migration
 
-File storage service uses MySQL database. To run the migrations create a ormconfig.json file in the root directory with database configurations. Please refer to the ormconfig.sample.json for sample file.
+File storage service uses MySQL database.
 
 Run the following command to run migrations.
 

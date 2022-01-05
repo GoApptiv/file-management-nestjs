@@ -19,8 +19,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:generate": "npx typeorm migration:generate -n",
-    "migration:run": "npm run build && npx typeorm migration:run"
+    "typeorm": "ts-node --files -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config ormconfig.ts",
+    "migration:generate": "npm run build && npm run typeorm migration:generate -- -n",
+    "migration:create": "npm run build && npm run typeorm migration:create -- -n",
+    "migration:run": "npm run build && npm run typeorm migration:run"
   },
   "dependencies": {
     "@google-cloud/storage": "^5.14.0",
