@@ -1,6 +1,6 @@
 # File Storage Service
 
-File storage service is Microservice build to securely store your files to the Google Cloud bucket.
+File storage service is a Microservice build to securely store your files to the Google Cloud bucket.
 
 ## Installation
 
