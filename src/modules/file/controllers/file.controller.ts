@@ -65,7 +65,10 @@ export class FileController {
     readFile.uuid = params.uuid;
     readFile.ip = ip;
     readFile.userAgent = request.headers['user-agent'];
-    return this.fileService.generateReadSignedUrl(readFile);
+    return this.fileService.generateReadSignedUrl(
+      readFile,
+      request['user'].projectId,
+    );
   }
 
   @Post('bulk/uuid')
@@ -89,7 +92,10 @@ export class FileController {
     const data = new BulkReadFileBo(dto);
     data.ip = ip;
     data.userAgent = request.headers['user-agent'];
-    return this.fileService.bulkGenerateReadSignedUrl(data, 1);
+    return this.fileService.bulkGenerateReadSignedUrl(
+      data,
+      request['user'].projectId,
+    );
   }
 
   @Post()

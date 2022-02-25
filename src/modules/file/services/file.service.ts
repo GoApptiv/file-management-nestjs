@@ -120,13 +120,18 @@ export class FileService {
   /**
    * generate read signed url
    * @param uuid - hash id of the file
+   * @param projectId - project id of the file
    * @returns read access signed url
    */
-  async generateReadSignedUrl(data: ReadFileBo): Promise<ReadSignedUrlResult> {
-    const file = await this.fileRepository.findByUuid(data.uuid, [
-      'template',
-      'template.bucketConfig',
-    ]);
+  async generateReadSignedUrl(
+    data: ReadFileBo,
+    projectId: number,
+  ): Promise<ReadSignedUrlResult> {
+    const file = await this.fileRepository.findByUuidAndProjectId(
+      data.uuid,
+      projectId,
+      ['template', 'template.bucketConfig'],
+    );
 
     if (file === undefined || file.isUploaded === false) {
       throw new InvalidFileException('File does not exist');
@@ -164,10 +169,11 @@ export class FileService {
     const uuids = data.uuids;
     const fileAccessEvents: FileAccessedEvent[] = [];
 
-    const files = await this.fileRepository.fetchByUuids(uuids, [
-      'template',
-      'template.bucketConfig',
-    ]);
+    const files = await this.fileRepository.fetchByUuidsAndProjectId(
+      uuids,
+      projectId,
+      ['template', 'template.bucketConfig'],
+    );
 
     for (const file of files) {
       if (file.isUploaded) {
