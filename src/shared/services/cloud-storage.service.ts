@@ -6,7 +6,7 @@ import {
 } from '@google-cloud/storage';
 import { Injectable } from '@nestjs/common';
 import moment from 'moment';
-import { BucketType } from '../constants/bucket-type';
+import { BucketType } from '../constants/bucket-type.enum';
 
 @Injectable()
 export class CloudStorageService {

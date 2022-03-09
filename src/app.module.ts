@@ -6,12 +6,14 @@ import { AppConfigModule } from './config/config.module';
 import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { PluginModule } from './modules/plugin/plugin.module';
 
 @Module({
   imports: [
     FileModule,
     AuthModule,
     AppConfigModule,
+    PluginModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
