@@ -5,8 +5,6 @@ import { ResponseSuccess } from '../interfaces/response-success.interface';
 export class RestResponse {
   /**
    * build success response
-   * @param data - data object
-   * @returns Response Success
    */
   static success(data: Record<string, any> | string): ResponseSuccess {
     return {
@@ -18,9 +16,6 @@ export class RestResponse {
 
   /**
    * build response error
-   * @param message - message
-   * @param errors - error message
-   * @returns Response error
    */
   static error(
     message: string,
@@ -36,8 +31,6 @@ export class RestResponse {
 
   /**
    * transforms class validator error to key value pair
-   * @param validationErrors - ValidationError array from class validator
-   * @returns transforms into key value pair error
    */
   static transformValidationError(
     validationErrors: Array<ValidationError>,
@@ -60,8 +53,6 @@ export class RestResponse {
 
   /**
    * maps validation error children to validation errors
-   * @param error - ValidationError object
-   * @returns children mapped to the validation error object
    */
   private static mapChildrenToValidationErrors(
     error: ValidationError,
@@ -81,9 +72,6 @@ export class RestResponse {
 
   /**
    * Prepend validator error constraints with the Parent
-   * @param parentError - Parent ValidationError
-   * @param error - Child ValidationError
-   * @returns constraints mapped with the Parent object
    */
   private static prependConstraintsWithParentProp(
     parentError: ValidationError,

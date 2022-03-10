@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Status } from 'src/shared/constants/status.enum';
-import { PluginDAO } from '../dto/Plugin.dto';
+import { PluginDAO } from '../dao/plugin.dao';
 import { Plugin } from '../entities/plugin.entity';
 import { PluginRepository } from '../repositories/plugin.repository';
 
@@ -11,8 +11,7 @@ export class PluginService {
   /**
    * Returns an action that fetches the plugins.
    *
-   * @param {PluginDAO} filters
-   * @returns {Promise<Plugin[]>}
+   * @returns arrays of active plugins
    */
   async fetch(): Promise<Plugin[]> {
     const filters = new PluginDAO();

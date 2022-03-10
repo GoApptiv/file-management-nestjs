@@ -23,6 +23,7 @@ import { FileArchiveEvent } from '../events/file-archive.event';
 import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 import { InvalidTemplateException } from '../exceptions/invalid-template.exception';
+import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 
 @Injectable()
 export class FileService {
@@ -36,8 +37,6 @@ export class FileService {
 
   /**
    * generate signed url
-   * @param data - Register file request
-   * @returns signed url and uuid
    */
   async generateUploadSignedUrl(
     data: RegisterFileBO,
@@ -100,8 +99,6 @@ export class FileService {
 
   /**
    * confirm upload
-   * @param uuid - uuid of the file
-   * @returns update result
    */
   async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
     const updateResult = await this.fileRepository.updateByUuid(
@@ -119,9 +116,6 @@ export class FileService {
 
   /**
    * generate read signed url
-   * @param uuid - hash id of the file
-   * @param projectId - project id of the file
-   * @returns read access signed url
    */
   async generateReadSignedUrl(
     data: ReadFileBo,
@@ -160,11 +154,11 @@ export class FileService {
 
   /**
    * generates bulk read signed urls
-   * @param data - Bulk Read url data
-   * @param projectId - Project id
-   * @returns arrays of signed urls and uuid
    */
-  async bulkGenerateReadSignedUrl(data: BulkReadFileBo, projectId: number) {
+  async bulkGenerateReadSignedUrl(
+    data: BulkReadFileBo,
+    projectId: number,
+  ): Promise<BulkReadSignedUrlResult> {
     const signedUrls: ReadSignedUrlResult[] = [];
     const uuids = data.uuids;
     const fileAccessEvents: FileAccessedEvent[] = [];
@@ -210,7 +204,6 @@ export class FileService {
 
   /**
    * Archive Directory
-   * @param uuid - uuid of the original file
    */
   async archiveDirectory(uuid: string): Promise<ArchiveFileResult> {
     const file = await this.fileRepository.findByUuid(uuid);
@@ -244,13 +237,6 @@ export class FileService {
 
   /**
    * Store file request in the database
-   * @param dto - register file request
-   * @param projectId - id of the project
-   * @param uuid - generated uuid
-   * @param storagePath - storage path
-   * @param templateId - template id
-   * @param archivalDate - file archival date
-   * @returns stored record data
    */
   private async storeFileUploadRequest(
     data: RegisterFileBO,
@@ -279,16 +265,13 @@ export class FileService {
 
   /**
    * validate file to be uploaded
-   * @param templateCode - Template code of the file
-   * @param fileSize - Size of the file to be uploaded
-   * @param fileType - MimeType of the file to be uploaded
-   * @returns true or false
+
    */
   private async isFileValidForTemplate(
     templateCode: string,
     fileSize: number,
     fileType: string,
-  ) {
+  ): Promise<boolean> {
     const template = await this.templateRepository.findByCode(templateCode, [
       'mimeTypes',
     ]);
@@ -312,11 +295,6 @@ export class FileService {
 
   /**
    * generate storage path for the file
-   * @param baseStoragePath - Base Storage Path of the project
-   * @param slug - Slug
-   * @param fileName - Name of the file to be uploaded with extension
-   * @param referenceNumber - Reference number of the file request
-   * @returns file storage path with extension
    */
   private generateStoragePath(
     baseStoragePath: string,
@@ -328,8 +306,6 @@ export class FileService {
 
   /**
    * generate signed url expiry time
-   * @param expiryTime - Expiry time in seconds
-   * @returns moment object with addition of expiry time
    */
   private generateExpiryTime(expiryTime: number): moment.Moment {
     return moment().add(expiryTime, 'seconds');
@@ -337,9 +313,6 @@ export class FileService {
 
   /**
    * generate hash id
-   * @param referenceNumber - External reference number
-   * @param projectId - Project id
-   * @returns unique uuid
    */
   private generateUuid(referenceNumber: string, projectId: number): string {
     return UtilsService.generateHash(`${referenceNumber}_${projectId}`, 'sha1');
@@ -347,8 +320,6 @@ export class FileService {
 
   /**
    * Initialize the storage for the bucket config
-   * @param bucketConfig
-   * @returns cloud storage service object for the template bucket
    */
   private async getCloudStorage(
     bucketConfig: BucketConfig,

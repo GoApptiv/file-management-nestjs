@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { GcpCredentialsOptions } from 'src/shared/interfaces/gcp-credentials-options.interface';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Injectable()
@@ -87,5 +88,15 @@ export class AppConfigService {
 
   get jwtSecret(): string {
     return this.getString('JWT_TOKEN_SECRET');
+  }
+
+  get gcpCredentials(): GcpCredentialsOptions {
+    return {
+      projectId: this.getString('GCP_PROJECT_ID'),
+      pubSub: {
+        email: this.getString('GCP_PUBSUB_EMAIL'),
+        privateKey: this.getString('GCP_PUBSUB_KEY'),
+      },
+    };
   }
 }

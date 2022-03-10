@@ -7,7 +7,10 @@ export class MimeTypeRepository extends Repository<MimeType> {
   /**
    * Finds entity which matches the type
    */
-  async findByType(type: string, relations?: string[]): Promise<MimeType> {
+  async findByType(
+    type: string,
+    relations?: (keyof MimeType)[] | string[],
+  ): Promise<MimeType> {
     return await this.findOne({ where: { type }, relations: relations });
   }
 }

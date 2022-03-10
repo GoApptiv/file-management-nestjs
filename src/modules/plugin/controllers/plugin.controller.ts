@@ -1,8 +1,9 @@
-import { Get } from '@nestjs/common';
+import { Get, UseGuards } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
 import { RestResponse } from 'src/shared/services/rest-response.service';
-import { PluginService } from '../services/PluginService';
+import { PluginService } from '../services/plugin.service';
 
 @Controller({
   path: 'plugins',
@@ -12,12 +13,20 @@ export class PluginController {
   constructor(private readonly pluginService: PluginService) {}
 
   @Get()
-  /**
-   * Fetches Plugins.
-   *
-   * @returns {Promise<ResponseSuccess>}
-   */
+  // @UseGuards(JwtAuthGuard)
   async index(): Promise<ResponseSuccess> {
+    const message = {
+      bucketConfig: {
+        email: '',
+        password: '',
+      },
+      path: {
+        source: '',
+        destination: '',
+      },
+    };
+    // this.cloudPubSubService.publishMessage('test-sample-topic', message);
+
     const data = await this.pluginService.fetch();
     return RestResponse.success(data);
   }

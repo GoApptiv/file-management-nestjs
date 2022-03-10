@@ -31,10 +31,6 @@ export class CloudStorageService {
 
   /**
    * generate upload signed url
-   * @param path - Path where the file will be stored in the bucket.
-   * @param contentType - Content Type of the file
-   * @param expiryTime - link expiry time
-   * @returns Signed url
    */
   async generateUploadSignedUrl(
     path: string,
@@ -56,9 +52,6 @@ export class CloudStorageService {
 
   /**
    * generate read signed url
-   * @param path - Path where the file will be stored in the bucket.
-   * @param expiryTime - link expiry time
-   * @returns Signed url
    */
   async generateReadSignedUrl(
     path: string,
@@ -78,8 +71,6 @@ export class CloudStorageService {
 
   /**
    * sets the storage class to archive which is of minimum duration 365 days
-   * @param file - File Path
-   * @returns bucket response
    */
   async setStorageClassToArchive(
     file: string,
@@ -89,8 +80,6 @@ export class CloudStorageService {
 
   /**
    * sets the directory storage class to archive which is of minimum duration 365 days
-   * @param file - File Path
-   * @returns void
    */
   async setDirectoryStorageClassToArchive(directory: string): Promise<void> {
     const filePages = await this.bucket.getFiles({ directory });
@@ -103,8 +92,6 @@ export class CloudStorageService {
 
   /**
    * sets the storage class to standard
-   * @param file - File Path
-   * @returns bucket response
    */
   async setStorageClassToStandard(
     file: string,
@@ -114,8 +101,6 @@ export class CloudStorageService {
 
   /**
    * sets the directory storage class to standard
-   * @param file - File Path
-   * @returns void
    */
   async setDirectoryStorageClassToStandard(directory: string): Promise<void> {
     const filePages = await this.bucket.getFiles({ directory });

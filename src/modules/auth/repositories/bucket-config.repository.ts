@@ -9,7 +9,7 @@ export class BucketConfigRepository extends Repository<BucketConfig> {
    */
   async findByProjectId(
     projectId: number,
-    relations?: string[],
+    relations?: (keyof BucketConfig)[] | string[],
   ): Promise<BucketConfig> {
     return await this.findOne({
       where: { projectId },

@@ -15,7 +15,10 @@ export class FileRepository extends Repository<File> {
   /**
    * Finds entity which matches the uuid
    */
-  async findByUuid(uuid: string, relations?: string[]): Promise<File> {
+  async findByUuid(
+    uuid: string,
+    relations?: (keyof File)[] | string[],
+  ): Promise<File> {
     return await this.findOne({ where: { uuid }, relations: relations });
   }
 
@@ -25,7 +28,7 @@ export class FileRepository extends Repository<File> {
   async findByUuidAndProjectId(
     uuid: string,
     projectId: number,
-    relations?: string[],
+    relations?: (keyof File)[] | string[],
   ): Promise<File> {
     return await this.findOne({
       where: { uuid, projectId },
@@ -36,7 +39,10 @@ export class FileRepository extends Repository<File> {
   /**
    * Fetch entity which matches the uuids
    */
-  async fetchByUuids(uuids: [], relations?: string[]): Promise<File[]> {
+  async fetchByUuids(
+    uuids: [],
+    relations?: (keyof File)[] | string[],
+  ): Promise<File[]> {
     return await this.find({
       where: {
         uuid: In(uuids),
@@ -51,7 +57,7 @@ export class FileRepository extends Repository<File> {
   async fetchByUuidsAndProjectId(
     uuids: [],
     projectId: number,
-    relations?: string[],
+    relations?: (keyof File)[] | string[],
   ): Promise<File[]> {
     return await this.find({
       where: {
