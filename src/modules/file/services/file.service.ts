@@ -9,7 +9,6 @@ import { CloudStorageService } from 'src/shared/services/cloud-storage.service';
 import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
-import { BucketConfigRepository } from 'src/modules/auth/repositories/bucket-config.repository';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { DuplicateReferenceNumberException } from '../exceptions/duplicate-reference-number.exception';
 import { InvalidFileException } from '../exceptions/invalid-file.exception';
@@ -24,6 +23,16 @@ import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 import { InvalidTemplateException } from '../exceptions/invalid-template.exception';
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
+import { CreateFileVariantBO } from '../bo/create-file-variant.bo';
+import { FileVariantDAO } from '../dao/file-variant.dao';
+import { PluginRepository } from 'src/modules/plugin/repositories/plugin.repository';
+import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
+import { FileVariantRepository } from '../repositories/file-variant.repository';
+import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
+import { FileVariantLogRepository } from '../repositories/file-variant-log.repository';
+import { FileVariantLogDAO } from '../dao/file-variant-log.dao';
+import { FileVariantPubSubMessage } from '../interfaces/file-variant-pubsub-message-interface';
+import { FileVariantCreateResult } from '../results/file-variant-create.result';
 
 @Injectable()
 export class FileService {
@@ -32,7 +41,10 @@ export class FileService {
     private readonly templateRepository: TemplateRepository,
     private readonly fileRepository: FileRepository,
     private readonly mimeTypeRepository: MimeTypeRepository,
-    private readonly bucketConfigRepository: BucketConfigRepository,
+    private readonly pluginRepository: PluginRepository,
+    private readonly fileVariantRepository: FileVariantRepository,
+    private readonly fileVariantLogRepository: FileVariantLogRepository,
+    private readonly cloudPubSubService: CloudPubSubService,
   ) {}
 
   /**
@@ -233,6 +245,97 @@ export class FileService {
       uuid,
       processed: true,
     };
+  }
+
+  /**
+   * Makes File Plugin Variant creations async request
+   */
+  async createFileVariants(
+    data: CreateFileVariantBO,
+    projectId: number,
+  ): Promise<FileVariantCreateResult[]> {
+    const uuid = data.uuid;
+    const file = await this.fileRepository.findByUuidAndProjectId(
+      uuid,
+      projectId,
+      ['template', 'template.bucketConfig'],
+    );
+
+    if (file === undefined || file.isUploaded === false) {
+      throw new InvalidFileException('File does not exist');
+    }
+
+    const fileVariants = [];
+
+    for (const plugin of data.plugins) {
+      const pluginData = await this.pluginRepository.findByCode(plugin.code);
+
+      const fileVariant = new FileVariantDAO();
+      fileVariant.fileId = file.id;
+      fileVariant.pluginId = pluginData.id;
+      fileVariant.status = FileVariantStatus.REQUESTED;
+      fileVariant.storagePath = null;
+      const fileVariantData = await this.fileVariantRepository.store(
+        fileVariant,
+      );
+
+      const pubsubMessage: FileVariantPubSubMessage = {
+        metadata: {
+          uuid: file.uuid,
+          variantId: fileVariantData.id,
+        },
+        bucketConfig: {
+          email: file.template.bucketConfig.email,
+          password: file.template.bucketConfig.key,
+        },
+        path: {
+          source: file.storagePath,
+          destination: file.storagePath,
+        },
+      };
+
+      const pubsubMessageId = await this.cloudPubSubService.publishMessage(
+        pluginData.cloudFunctionTopic,
+        pubsubMessage,
+      );
+
+      if (pubsubMessageId !== null) {
+        await this.fileVariantRepository.updateStatusById(
+          fileVariantData.id,
+          FileVariantStatus.QUEUED,
+        );
+
+        const fileVariantLog = new FileVariantLogDAO();
+        fileVariantLog.fileId = file.id;
+        fileVariantLog.pluginId = pluginData.id;
+        fileVariantLog.status = FileVariantStatus.QUEUED;
+        fileVariantLog.creationTopicMessageId = pubsubMessageId;
+
+        await this.fileVariantLogRepository.store(fileVariantLog);
+
+        const response: FileVariantCreateResult = {
+          variantId: fileVariant.id,
+          pluginCode: plugin.code,
+          status: FileVariantStatus.QUEUED,
+        };
+
+        fileVariants.push(response);
+      } else {
+        await this.fileVariantRepository.updateStatusById(
+          fileVariantData.id,
+          FileVariantStatus.ERROR,
+        );
+      }
+    }
+
+    return fileVariants;
+  }
+
+  async updateFileVariantStatus(
+    variantId: number,
+    status: FileVariantStatus,
+  ): Promise<boolean> {
+    return false;
   }
 
   /**

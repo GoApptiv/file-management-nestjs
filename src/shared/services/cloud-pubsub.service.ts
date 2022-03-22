@@ -22,12 +22,16 @@ export class CloudPubSubService {
 
   async publishMessage(
     topicName: string,
-    data: Record<string, unknown>,
+    data: Record<any, any>,
   ): Promise<string> {
-    const message = await this.client
-      .topic(topicName)
-      .publishMessage({ json: data });
-    return message;
+    try {
+      const message = await this.client
+        .topic(topicName)
+        .publishMessage({ json: data });
+      return message;
+    } catch (e) {
+      return null;
+    }
   }
 
   async createPushSubscription(

@@ -13,20 +13,8 @@ export class PluginController {
   constructor(private readonly pluginService: PluginService) {}
 
   @Get()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async index(): Promise<ResponseSuccess> {
-    const message = {
-      bucketConfig: {
-        email: '',
-        password: '',
-      },
-      path: {
-        source: '',
-        destination: '',
-      },
-    };
-    // this.cloudPubSubService.publishMessage('test-sample-topic', message);
-
     const data = await this.pluginService.fetch();
     return RestResponse.success(data);
   }

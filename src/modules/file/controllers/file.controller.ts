@@ -18,14 +18,18 @@ import {
 } from '@nestjs/swagger';
 import { RealIP } from 'nestjs-real-ip';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
+import { RestResponse } from 'src/shared/services/rest-response.service';
 import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
+import { CreateFileVariantBO } from '../bo/create-file-variant.bo';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
 import { ArchiveFileDTO } from '../dto/archive-file.dto';
 import { BulkReadFileDTO } from '../dto/bulk-read-file.dto';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
+import { CreateFileVariantDTO } from '../dto/create-file-variant-dto';
 import { RegisterFileDTO } from '../dto/register-file-dto';
-import { ArchiveFileResult } from '../results/archive-file.result';
+import { UpdateFileVariantStatus } from '../dto/update-file-variant-status.dto';
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { ReadSignedUrlResult } from '../results/read-signed-url.result';
@@ -148,7 +152,33 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  archive(@Body() dto: ArchiveFileDTO): Promise<ArchiveFileResult> {
-    return this.fileService.archiveDirectory(dto.uuid);
+  async archive(@Body() dto: ArchiveFileDTO): Promise<ResponseSuccess> {
+    const result = await this.fileService.archiveDirectory(dto.uuid);
+    return RestResponse.success(result);
+  }
+
+  @Post('variants')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'File variants',
+    description: 'Creates different file variants',
+  })
+  async createFileVariants(
+    @Body() dto: CreateFileVariantDTO,
+    @Req() request: Request,
+  ): Promise<ResponseSuccess> {
+    const createVariant = new CreateFileVariantBO(dto);
+    const variants = await this.fileService.createFileVariants(
+      createVariant,
+      request['user'].projectId,
+    );
+    return RestResponse.success(variants);
+  }
+
+  @Put('variants')
+  async updateFileVariantStatus(
+    @Body() dto: UpdateFileVariantStatus,
+  ): Promise<ResponseSuccess> {
+    return RestResponse.success('true');
   }
 }
