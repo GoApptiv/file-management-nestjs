@@ -179,6 +179,10 @@ export class FileController {
   async updateFileVariantStatus(
     @Body() dto: UpdateFileVariantStatus,
   ): Promise<ResponseSuccess> {
-    return RestResponse.success('true');
+    const response = this.fileService.updateFileVariantStatus(
+      dto.variantId,
+      dto.status,
+    );
+    return RestResponse.success(response);
   }
 }

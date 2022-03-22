@@ -2,7 +2,7 @@ import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum
 
 export class FileVariantLogDAO {
   id: number;
-  fileId: number;
+  variantId: number;
   pluginId: number;
   status: FileVariantStatus;
   creationTopicMessageId: string;

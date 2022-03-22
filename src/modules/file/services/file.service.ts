@@ -306,7 +306,7 @@ export class FileService {
         );
 
         const fileVariantLog = new FileVariantLogDAO();
-        fileVariantLog.fileId = file.id;
+        fileVariantLog.variantId = fileVariant.id;
         fileVariantLog.pluginId = pluginData.id;
         fileVariantLog.status = FileVariantStatus.QUEUED;
         fileVariantLog.creationTopicMessageId = pubsubMessageId;
@@ -331,11 +331,24 @@ export class FileService {
     return fileVariants;
   }
 
+  /**
+   * Updates file variant status
+   */
   async updateFileVariantStatus(
     variantId: number,
     status: FileVariantStatus,
   ): Promise<boolean> {
-    return false;
+    const update = await this.fileVariantRepository.updateStatusById(
+      variantId,
+      status,
+    );
+
+    await this.fileVariantLogRepository.updateStatusByVariantId(
+      variantId,
+      status,
+    );
+
+    return update;
   }
 
   /**

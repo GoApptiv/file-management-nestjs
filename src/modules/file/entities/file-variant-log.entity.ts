@@ -2,16 +2,16 @@ import { Plugin } from 'src/modules/plugin/entities/plugin.entity';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { File } from './file.entity';
+import { FileVariant } from './file-variant.entity';
 
 @Entity('file_variant_logs')
 export class FileVariantLog extends AbstractEntity {
   @Column()
-  fileId: number;
+  variantId: number;
 
-  @ManyToOne(() => File, (file) => file.id)
-  @JoinColumn({ name: 'file_id' })
-  file: File;
+  @ManyToOne(() => FileVariant, (fileVariant) => fileVariant.id)
+  @JoinColumn({ name: 'variant_id' })
+  fileVariant: FileVariant;
 
   @Column()
   pluginId: number;
