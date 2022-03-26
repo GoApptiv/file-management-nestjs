@@ -3,12 +3,15 @@ export interface FileVariantPubSubMessage {
     uuid: string;
     variantId: number;
   };
-  bucketConfig: {
-    email: string;
-    password: string;
-  };
-  path: {
-    source: string;
-    destination: string;
+  bucket: {
+    source: {
+      accessToken: string;
+      path: string;
+      file: string;
+    };
+    destination: {
+      accessToken: string;
+      path: string;
+    };
   };
 }

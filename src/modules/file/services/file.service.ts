@@ -33,6 +33,9 @@ import { FileVariantLogRepository } from '../repositories/file-variant-log.repos
 import { FileVariantLogDAO } from '../dao/file-variant-log.dao';
 import { FileVariantPubSubMessage } from '../interfaces/file-variant-pubsub-message-interface';
 import { FileVariantCreateResult } from '../results/file-variant-create.result';
+import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
+import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
+import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
 
 @Injectable()
 export class FileService {
@@ -85,7 +88,7 @@ export class FileService {
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTimeInS);
 
-      const storage = await this.getCloudStorage(template.bucketConfig);
+      const storage = await this.getCloudStorageService(template.bucketConfig);
 
       const signedUrl = await storage.generateUploadSignedUrl(
         storagePath,
@@ -145,7 +148,9 @@ export class FileService {
 
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
-    const storage = await this.getCloudStorage(file.template.bucketConfig);
+    const storage = await this.getCloudStorageService(
+      file.template.bucketConfig,
+    );
 
     const signedUrl = await storage.generateReadSignedUrl(
       file.storagePath,
@@ -187,7 +192,9 @@ export class FileService {
           file.template.linkExpiryTimeInS,
         );
 
-        const storage = await this.getCloudStorage(file.template.bucketConfig);
+        const storage = await this.getCloudStorageService(
+          file.template.bucketConfig,
+        );
 
         const signedUrl = await storage.generateReadSignedUrl(
           file.storagePath,
@@ -274,9 +281,30 @@ export class FileService {
       fileVariant.fileId = file.id;
       fileVariant.pluginId = pluginData.id;
       fileVariant.status = FileVariantStatus.REQUESTED;
-      fileVariant.storagePath = null;
+      fileVariant.storagePath = file.storagePath;
       const fileVariantData = await this.fileVariantRepository.store(
         fileVariant,
+      );
+
+      const fileStoragePath = this.generateFileNamePathFromStoragePath(
+        file.storagePath,
+      );
+
+      const iamService = await this.getCloudIAMService(
+        file.template.bucketConfig.email,
+        this.decodeBucketConfigPrivateKey(file.template.bucketConfig.key),
+      );
+
+      const bucketReadOnlyToken = await iamService.generateAccessToken(
+        file.template.bucketConfig.email,
+        [GCP_SCOPE.cloudStorage.readOnly],
+        GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
+      );
+
+      const bucketWriteOnlyToken = await iamService.generateAccessToken(
+        file.template.bucketConfig.email,
+        [GCP_SCOPE.cloudStorage.writeOnly],
+        GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
       );
 
       const pubsubMessage: FileVariantPubSubMessage = {
@@ -284,13 +312,16 @@ export class FileService {
           uuid: file.uuid,
           variantId: fileVariantData.id,
         },
-        bucketConfig: {
-          email: file.template.bucketConfig.email,
-          password: file.template.bucketConfig.key,
-        },
-        path: {
-          source: file.storagePath,
-          destination: file.storagePath,
+        bucket: {
+          source: {
+            accessToken: bucketReadOnlyToken.accessToken,
+            path: fileStoragePath.filePath,
+            file: fileStoragePath.fileName,
+          },
+          destination: {
+            accessToken: bucketWriteOnlyToken.accessToken,
+            path: fileStoragePath.filePath,
+          },
         },
       };
 
@@ -435,15 +466,48 @@ export class FileService {
   }
 
   /**
-   * Initialize the storage for the bucket config
+   * initialize the storage for the bucket config
    */
-  private async getCloudStorage(
+  private async getCloudStorageService(
     bucketConfig: BucketConfig,
   ): Promise<CloudStorageService> {
     return new CloudStorageService(
       bucketConfig.email,
-      UtilsService.base64decodeKey(bucketConfig.key),
+      this.decodeBucketConfigPrivateKey(bucketConfig.key),
       bucketConfig.name,
     );
+  }
+
+  /**
+   * initialize the iam client
+   */
+  private async getCloudIAMService(
+    clientEmail: string,
+    privateKey: string,
+  ): Promise<CloudIAMService> {
+    return new CloudIAMService(clientEmail, privateKey);
+  }
+
+  /**
+   * returns fileName and filePath
+   */
+  private generateFileNamePathFromStoragePath(storagePath: string): {
+    fileName: string;
+    filePath: string;
+  } {
+    const storagePathSplit = storagePath.split('/');
+    const filePath = storagePathSplit
+      .splice(0, storagePathSplit.length - 1)
+      .join('/');
+    const fileName = storagePathSplit[storagePathSplit.length - 1];
+
+    return { filePath, fileName };
+  }
+
+  /**
+   * decodes bucket private key
+   */
+  private decodeBucketConfigPrivateKey(key: string): string {
+    return UtilsService.base64decodeKey(key);
   }
 }
