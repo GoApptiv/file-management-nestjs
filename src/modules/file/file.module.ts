@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppConfigService } from 'src/config/app-config.service';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { BucketConfigRepository } from '../auth/repositories/bucket-config.repository';
 import { ProjectRepository } from '../auth/repositories/project.repository';
@@ -33,7 +34,17 @@ import { FileService } from './services/file.service';
   controllers: [FileController],
   providers: [
     FileService,
-    CloudPubSubService,
+    {
+      provide: CloudPubSubService,
+      useFactory: (configService: AppConfigService) => {
+        return new CloudPubSubService(
+          configService.gcpCredentials.pubSub.email,
+          configService.gcpCredentials.pubSub.privateKey,
+          configService.gcpCredentials.projectId,
+        );
+      },
+      inject: [AppConfigService],
+    },
     FileAccessedListener,
     FileArchiveListener,
     BulkFileAccessedListener,

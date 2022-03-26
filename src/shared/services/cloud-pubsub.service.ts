@@ -4,19 +4,18 @@ import {
   PubSub,
 } from '@google-cloud/pubsub';
 import { Injectable } from '@nestjs/common';
-import { AppConfigService } from 'src/config/app-config.service';
 
 @Injectable()
 export class CloudPubSubService {
   private client: PubSub;
 
-  constructor(config: AppConfigService) {
+  constructor(email: string, privateKey: string, projectId: string) {
     this.client = new PubSub({
       credentials: {
-        private_key: config.gcpCredentials.pubSub.privateKey,
-        client_email: config.gcpCredentials.pubSub.email,
+        private_key: privateKey,
+        client_email: email,
       },
-      projectId: config.gcpCredentials.projectId,
+      projectId,
     });
   }
 

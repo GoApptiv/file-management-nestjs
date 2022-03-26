@@ -11,7 +11,6 @@ export class CloudIAMService {
    * @param privateKey - The private key of the service account.
    */
   constructor(email: string, privateKey: string) {
-    console.log(email);
     this.client = new IAMCredentialsClient({
       credentials: {
         client_email: email,

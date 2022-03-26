@@ -39,7 +39,17 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   providers: [
     AuthService,
     ProjectService,
-    CloudPubSubService,
+    {
+      provide: CloudPubSubService,
+      useFactory: (configService: AppConfigService) => {
+        return new CloudPubSubService(
+          configService.gcpCredentials.pubSub.email,
+          configService.gcpCredentials.pubSub.privateKey,
+          configService.gcpCredentials.projectId,
+        );
+      },
+      inject: [AppConfigService],
+    },
     ProjectPluginRegisteredListener,
     JwtStrategy,
   ],
