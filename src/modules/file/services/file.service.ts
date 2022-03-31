@@ -36,6 +36,7 @@ import { FileVariantCreateResult } from '../results/file-variant-create.result';
 import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
 import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
 import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
+import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 
 @Injectable()
 export class FileService {
@@ -367,15 +368,22 @@ export class FileService {
   /**
    * Updates file variant status
    */
-  async updateFileVariantStatus(
+  async updateFileVariantStatusByCfResponse(
     variantId: number,
-    status: FileVariantStatus,
+    cfStatus: FileVariantCfStatus,
   ): Promise<boolean> {
+    let status = FileVariantStatus.CREATED;
+
+    if (cfStatus == FileVariantCfStatus.SUCCESS) {
+      status = FileVariantStatus.CREATED;
+    } else {
+      status = FileVariantStatus.ERROR;
+    }
+
     const update = await this.fileVariantRepository.updateStatusById(
       variantId,
       status,
     );
-
     await this.fileVariantLogRepository.updateStatusByVariantId(
       variantId,
       status,

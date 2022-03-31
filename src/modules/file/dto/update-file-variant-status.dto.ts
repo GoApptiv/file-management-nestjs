@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
-import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
+import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 
 export class UpdateFileVariantStatus {
   @ApiProperty({
@@ -15,5 +15,5 @@ export class UpdateFileVariantStatus {
     example: 'created',
   })
   @IsString()
-  status: FileVariantStatus;
+  status: FileVariantCfStatus;
 }

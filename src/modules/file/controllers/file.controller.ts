@@ -179,7 +179,7 @@ export class FileController {
   async updateFileVariantStatus(
     @Body() dto: UpdateFileVariantStatus,
   ): Promise<ResponseSuccess> {
-    const response = this.fileService.updateFileVariantStatus(
+    const response = this.fileService.updateFileVariantStatusByCfResponse(
       dto.variantId,
       dto.status,
     );
