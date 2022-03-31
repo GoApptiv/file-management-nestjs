@@ -5,11 +5,13 @@ export interface FileVariantPubSubMessage {
   };
   bucket: {
     source: {
+      bucketName: string;
       accessToken: string;
       path: string;
       file: string;
     };
     destination: {
+      bucketName: string;
       accessToken: string;
       path: string;
     };

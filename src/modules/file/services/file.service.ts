@@ -314,11 +314,13 @@ export class FileService {
         },
         bucket: {
           source: {
+            bucketName: file.template.bucketConfig.name,
             accessToken: bucketReadOnlyToken.accessToken,
             path: fileStoragePath.filePath,
             file: fileStoragePath.fileName,
           },
           destination: {
+            bucketName: file.template.bucketConfig.name,
             accessToken: bucketWriteOnlyToken.accessToken,
             path: fileStoragePath.filePath,
           },
