@@ -4,7 +4,8 @@ export class PluginDAO {
   id: number;
   name: string;
   code: string;
-  cloudFunctionUrl: string;
+  cloudFunctionTopic: string;
+  cloudFunctionResponseTopic: string;
   status: Status;
 
   constructor(partial: Partial<PluginDAO> = {}) {

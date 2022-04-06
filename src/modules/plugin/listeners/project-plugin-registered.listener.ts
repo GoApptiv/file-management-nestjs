@@ -36,7 +36,7 @@ export class ProjectPluginRegisteredListener {
     };
 
     const subscriber = await this.cloudPubSubService.createPushSubscription(
-      plugin.cloudFunctionTopic,
+      plugin.cloudFunctionResponseTopic,
       projectPlugin.pubsubStatusSubscriber,
       subscriberOption,
     );

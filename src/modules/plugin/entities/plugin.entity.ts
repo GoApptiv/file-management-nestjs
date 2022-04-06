@@ -15,6 +15,9 @@ export class Plugin extends AbstractEntity {
   @Column()
   cloudFunctionTopic: string;
 
+  @Column()
+  cloudFunctionResponseTopic: string;
+
   @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
   status: Status;
 

@@ -342,6 +342,10 @@ export class FileService {
           metadata: {
             uuid: file.uuid,
             variantId: fileVariantData.id,
+            projectId,
+          },
+          response: {
+            topic: pluginData.cloudFunctionResponseTopic,
           },
           bucket: {
             source: {
