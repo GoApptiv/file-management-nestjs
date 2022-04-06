@@ -37,6 +37,7 @@ import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
 import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
 import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
+import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
 
 @Injectable()
 export class FileService {
@@ -269,6 +270,7 @@ export class FileService {
       ['template', 'template.bucketConfig'],
     );
 
+    // check if file exists
     if (file === undefined || file.isUploaded === false) {
       throw new InvalidFileException('File does not exist');
     }
@@ -278,87 +280,127 @@ export class FileService {
     for (const plugin of data.plugins) {
       const pluginData = await this.pluginRepository.findByCode(plugin.code);
 
-      const fileVariant = new FileVariantDAO();
-      fileVariant.fileId = file.id;
-      fileVariant.pluginId = pluginData.id;
-      fileVariant.status = FileVariantStatus.REQUESTED;
-      fileVariant.storagePath = file.storagePath;
-      const fileVariantData = await this.fileVariantRepository.store(
-        fileVariant,
-      );
+      if (pluginData === undefined) {
+        throw new InvalidPluginCodeException();
+      }
 
-      const fileStoragePath = this.generateFileNamePathFromStoragePath(
-        file.storagePath,
-      );
-
-      const iamService = await this.getCloudIAMService(
-        file.template.bucketConfig.email,
-        this.decodeBucketConfigPrivateKey(file.template.bucketConfig.key),
-      );
-
-      const bucketReadOnlyToken = await iamService.generateAccessToken(
-        file.template.bucketConfig.email,
-        [GCP_SCOPE.cloudStorage.readOnly],
-        GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
-      );
-
-      const bucketWriteOnlyToken = await iamService.generateAccessToken(
-        file.template.bucketConfig.email,
-        [GCP_SCOPE.cloudStorage.writeOnly],
-        GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
-      );
-
-      const pubsubMessage: FileVariantPubSubMessage = {
-        metadata: {
-          uuid: file.uuid,
-          variantId: fileVariantData.id,
-        },
-        bucket: {
-          source: {
-            bucketName: file.template.bucketConfig.name,
-            accessToken: bucketReadOnlyToken.accessToken,
-            path: fileStoragePath.filePath,
-            file: fileStoragePath.fileName,
-          },
-          destination: {
-            bucketName: file.template.bucketConfig.name,
-            accessToken: bucketWriteOnlyToken.accessToken,
-            path: fileStoragePath.filePath,
-          },
-        },
-      };
-
-      const pubsubMessageId = await this.cloudPubSubService.publishMessage(
-        pluginData.cloudFunctionTopic,
-        pubsubMessage,
-      );
-
-      if (pubsubMessageId !== null) {
-        await this.fileVariantRepository.updateStatusById(
-          fileVariantData.id,
-          FileVariantStatus.QUEUED,
+      // check if the file variant already exists
+      const fileVariantInSystem =
+        await this.fileVariantRepository.findByFileIdAndPluginId(
+          file.id,
+          pluginData.id,
         );
 
-        const fileVariantLog = new FileVariantLogDAO();
-        fileVariantLog.variantId = fileVariant.id;
-        fileVariantLog.pluginId = pluginData.id;
-        fileVariantLog.status = FileVariantStatus.QUEUED;
-        fileVariantLog.creationTopicMessageId = pubsubMessageId;
-
-        await this.fileVariantLogRepository.store(fileVariantLog);
-
+      // if file variant already exists and not in error and delete state, append the result and skip
+      if (
+        fileVariantInSystem !== undefined &&
+        fileVariantInSystem.status !== FileVariantStatus.ERROR &&
+        fileVariantInSystem.status !== FileVariantStatus.DELETED
+      ) {
         const response: FileVariantCreateResult = {
-          variantId: fileVariant.id,
+          variantId: fileVariantInSystem.id,
           pluginCode: plugin.code,
-          status: FileVariantStatus.QUEUED,
+          status: fileVariantInSystem.status,
         };
 
         fileVariants.push(response);
       } else {
-        await this.fileVariantRepository.updateStatusById(
-          fileVariantData.id,
-          FileVariantStatus.ERROR,
+        // create file variant
+        const fileVariant = new FileVariantDAO();
+        fileVariant.fileId = file.id;
+        fileVariant.pluginId = pluginData.id;
+        fileVariant.status = FileVariantStatus.REQUESTED;
+        fileVariant.storagePath = file.storagePath;
+        const fileVariantData = await this.fileVariantRepository.store(
+          fileVariant,
         );
+
+        const fileStoragePath = this.generateFileNamePathFromStoragePath(
+          file.storagePath,
+        );
+
+        // create iam tokens
+        const iamService = await this.getCloudIAMService(
+          file.template.bucketConfig.email,
+          this.decodeBucketConfigPrivateKey(file.template.bucketConfig.key),
+        );
+
+        const bucketReadOnlyToken = await iamService.generateAccessToken(
+          file.template.bucketConfig.email,
+          [GCP_SCOPE.cloudStorage.readOnly],
+          GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
+        );
+
+        const bucketWriteOnlyToken = await iamService.generateAccessToken(
+          file.template.bucketConfig.email,
+          [GCP_SCOPE.cloudStorage.writeOnly],
+          GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
+        );
+
+        // create pub/sub message
+        const pubsubMessage: FileVariantPubSubMessage = {
+          metadata: {
+            uuid: file.uuid,
+            variantId: fileVariantData.id,
+          },
+          bucket: {
+            source: {
+              bucketName: file.template.bucketConfig.name,
+              accessToken: bucketReadOnlyToken.accessToken,
+              path: fileStoragePath.filePath,
+              file: fileStoragePath.fileName,
+            },
+            destination: {
+              bucketName: file.template.bucketConfig.name,
+              accessToken: bucketWriteOnlyToken.accessToken,
+              path: fileStoragePath.filePath,
+            },
+          },
+        };
+
+        // publish message in pub/sub
+        const pubsubMessageId = await this.cloudPubSubService.publishMessage(
+          pluginData.cloudFunctionTopic,
+          pubsubMessage,
+        );
+
+        // if pub/sub message is published successfully, update file variant status to queued
+        if (pubsubMessageId !== null) {
+          await this.fileVariantRepository.updateStatusById(
+            fileVariantData.id,
+            FileVariantStatus.QUEUED,
+          );
+
+          const fileVariantLog = new FileVariantLogDAO();
+          fileVariantLog.variantId = fileVariant.id;
+          fileVariantLog.pluginId = pluginData.id;
+          fileVariantLog.status = FileVariantStatus.QUEUED;
+          fileVariantLog.creationTopicMessageId = pubsubMessageId;
+
+          await this.fileVariantLogRepository.store(fileVariantLog);
+
+          const response: FileVariantCreateResult = {
+            variantId: fileVariant.id,
+            pluginCode: plugin.code,
+            status: FileVariantStatus.QUEUED,
+          };
+
+          fileVariants.push(response);
+        } else {
+          // if pub/sub message is not published successfully, update file variant status to error
+          await this.fileVariantRepository.updateStatusById(
+            fileVariantData.id,
+            FileVariantStatus.ERROR,
+          );
+
+          const response: FileVariantCreateResult = {
+            variantId: fileVariant.id,
+            pluginCode: plugin.code,
+            status: FileVariantStatus.ERROR,
+          };
+
+          fileVariants.push(response);
+        }
       }
     }
 

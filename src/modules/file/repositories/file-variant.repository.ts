@@ -23,4 +23,18 @@ export class FileVariantRepository extends Repository<FileVariant> {
     const update = await this.update({ id }, { status });
     return update.affected > 0 ? true : false;
   }
+
+  /**
+   * Finds entity which matches the fileId and pluginId
+   */
+  async findByFileIdAndPluginId(
+    fileId: number,
+    pluginId: number,
+    relations?: (keyof FileVariant)[] | string[],
+  ): Promise<FileVariant> {
+    return await this.findOne({
+      where: { fileId, pluginId },
+      relations: relations,
+    });
+  }
 }
