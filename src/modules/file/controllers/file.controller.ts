@@ -172,7 +172,12 @@ export class FileController {
       createVariant,
       request['user'].projectId,
     );
-    return RestResponse.success(variants);
+
+    const response = {
+      uuid: dto.uuid,
+      plugin: variants,
+    };
+    return RestResponse.success(response);
   }
 
   @Put('variants')

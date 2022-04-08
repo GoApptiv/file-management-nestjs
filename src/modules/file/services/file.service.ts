@@ -311,9 +311,6 @@ export class FileService {
         fileVariant.pluginId = pluginData.id;
         fileVariant.status = FileVariantStatus.REQUESTED;
         fileVariant.storagePath = file.storagePath;
-        const fileVariantData = await this.fileVariantRepository.store(
-          fileVariant,
-        );
 
         const fileStoragePath = this.generateFileNamePathFromStoragePath(
           file.storagePath,
@@ -335,6 +332,11 @@ export class FileService {
           file.template.bucketConfig.email,
           [GCP_SCOPE.cloudStorage.writeOnly],
           GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
+        );
+
+        // store data in file variant
+        const fileVariantData = await this.fileVariantRepository.store(
+          fileVariant,
         );
 
         // create pub/sub message
