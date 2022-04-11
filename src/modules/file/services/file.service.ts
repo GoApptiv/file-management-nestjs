@@ -38,6 +38,7 @@ import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
 import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
+import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
 
 @Injectable()
 export class FileService {
@@ -310,7 +311,6 @@ export class FileService {
         fileVariant.fileId = file.id;
         fileVariant.pluginId = pluginData.id;
         fileVariant.status = FileVariantStatus.REQUESTED;
-        fileVariant.storagePath = file.storagePath;
 
         const fileStoragePath = this.generateFileNamePathFromStoragePath(
           file.storagePath,
@@ -414,24 +414,28 @@ export class FileService {
   }
 
   /**
-   * Updates file variant status
+   * Updates file variant
    */
-  async updateFileVariantStatusByCfResponse(
+  async updateFileVariantByCfResponse(
     variantId: number,
-    cfStatus: FileVariantCfStatus,
+    data: UpdateFileVariantBO,
   ): Promise<boolean> {
     let status = FileVariantStatus.CREATED;
 
-    if (cfStatus == FileVariantCfStatus.SUCCESS) {
+    if (data.cfStatus == FileVariantCfStatus.SUCCESS) {
       status = FileVariantStatus.CREATED;
     } else {
       status = FileVariantStatus.ERROR;
     }
 
-    const update = await this.fileVariantRepository.updateStatusById(
+    const update = await this.fileVariantRepository.updateById(
       variantId,
-      status,
+      new FileVariantDAO({
+        status: status,
+        storagePath: data.filePath.replace(/\/$/, '') + '/' + data.fileName,
+      }),
     );
+
     await this.fileVariantLogRepository.updateStatusByVariantId(
       variantId,
       status,

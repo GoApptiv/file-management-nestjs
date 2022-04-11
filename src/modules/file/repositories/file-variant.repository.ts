@@ -37,4 +37,12 @@ export class FileVariantRepository extends Repository<FileVariant> {
       relations: relations,
     });
   }
+
+  /**
+   * Updates the data by id
+   */
+  async updateById(id: number, data: FileVariantDAO): Promise<boolean> {
+    const update = await this.update({ id }, data);
+    return update.affected > 0 ? true : false;
+  }
 }

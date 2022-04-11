@@ -24,6 +24,7 @@ import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
 import { CreateFileVariantBO } from '../bo/create-file-variant.bo';
 import { ReadFileBo } from '../bo/read-file.bo';
 import { RegisterFileBO } from '../bo/register-file.bo';
+import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
 import { ArchiveFileDTO } from '../dto/archive-file.dto';
 import { BulkReadFileDTO } from '../dto/bulk-read-file.dto';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
@@ -184,9 +185,13 @@ export class FileController {
   async updateFileVariantStatus(
     @Body() dto: UpdateFileVariantStatus,
   ): Promise<ResponseSuccess> {
-    const response = this.fileService.updateFileVariantStatusByCfResponse(
+    const response = this.fileService.updateFileVariantByCfResponse(
       dto.variantId,
-      dto.status,
+      new UpdateFileVariantBO({
+        filePath: dto.filePath,
+        fileName: dto.fileName,
+        cfStatus: dto.status,
+      }),
     );
     return RestResponse.success(response);
   }

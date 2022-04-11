@@ -11,6 +11,20 @@ export class UpdateFileVariantStatus {
   variantId: number;
 
   @ApiProperty({
+    description: 'file storage path in bucket',
+    example: '/IMAGES/',
+  })
+  @IsString()
+  filePath: string;
+
+  @ApiProperty({
+    description: 'file name stored in bucket',
+    example: 'image.jpg',
+  })
+  @IsString()
+  fileName: string;
+
+  @ApiProperty({
     description: 'status of the file',
     example: 'created',
   })
