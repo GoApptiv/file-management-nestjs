@@ -1,4 +1,5 @@
-import { In, Repository } from 'typeorm';
+import { FileStatus } from 'src/shared/constants/file-status.enum';
+import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
 import { FileDAO } from '../dao/file.dao';
 import { File } from '../entities/file.entity';
@@ -74,5 +75,20 @@ export class FileRepository extends Repository<File> {
   async updateByUuid(uuid: string, data: FileDAO): Promise<boolean> {
     const update = await this.update({ uuid }, data);
     return update.affected > 0 ? true : false;
+  }
+
+  /**
+   * Fetch all entities with the given status and before the given date
+   */
+  async fetchByStatusAndBeforeArchivalDateTime(
+    status: FileStatus,
+    dateTime: Date,
+  ): Promise<File[]> {
+    return await this.find({
+      where: {
+        status,
+        archivalDate: LessThanOrEqual(dateTime),
+      },
+    });
   }
 }

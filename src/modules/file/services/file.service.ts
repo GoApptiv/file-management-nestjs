@@ -39,7 +39,7 @@ import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/c
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
 import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { FileVariantReadResult } from '../results/file-variant-read.result';
 
 @Injectable()
@@ -639,7 +639,7 @@ export class FileService {
   /**
    * Fails the queued file variants
    */
-  @Cron('10 * * * * *')
+  @Cron(CronExpression.EVERY_10_MINUTES)
   private async failQueuedFileVariantsBeforeMinutes(
     minutes = Number(10),
   ): Promise<void> {
@@ -663,6 +663,22 @@ export class FileService {
       fileVariantLog.status = FileVariantStatus.ERROR;
 
       await this.fileVariantLogRepository.store(fileVariantLog);
+    }
+  }
+
+  /**
+   * archive the file which passed the archival date
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  private async archiveArchivalDatePassedFiles(): Promise<void> {
+    const files =
+      await this.fileRepository.fetchByStatusAndBeforeArchivalDateTime(
+        FileStatus.UPLOADED,
+        moment().toDate(),
+      );
+
+    for (const file of files) {
+      this.archiveDirectory(file.uuid);
     }
   }
 }
