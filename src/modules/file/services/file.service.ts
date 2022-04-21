@@ -39,6 +39,7 @@ import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/c
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
 import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class FileService {
@@ -436,10 +437,14 @@ export class FileService {
       }),
     );
 
-    await this.fileVariantLogRepository.updateStatusByVariantId(
-      variantId,
-      status,
-    );
+    const fileVariant = await this.fileVariantRepository.findById(variantId);
+
+    const fileVariantLog = new FileVariantLogDAO();
+    fileVariantLog.variantId = variantId;
+    fileVariantLog.pluginId = fileVariant.pluginId;
+    fileVariantLog.status = status;
+
+    await this.fileVariantLogRepository.store(fileVariantLog);
 
     return update;
   }
@@ -571,5 +576,35 @@ export class FileService {
    */
   private decodeBucketConfigPrivateKey(key: string): string {
     return UtilsService.base64decodeKey(key);
+  }
+
+  /**
+   * Fails the queued file variants
+   */
+  @Cron('10 * * * * *')
+  private async failQueuedFileVariantsBeforeMinutes(
+    minutes = Number(10),
+  ): Promise<void> {
+    const fileVariants =
+      await this.fileVariantRepository.fetchByStatusAndBeforeDateTime(
+        FileVariantStatus.QUEUED,
+        moment().subtract(minutes, 'minutes').toDate(),
+      );
+
+    for (const fileVariant of fileVariants) {
+      await this.fileVariantRepository.updateById(
+        fileVariant.id,
+        new FileVariantDAO({
+          status: FileVariantStatus.ERROR,
+        }),
+      );
+
+      const fileVariantLog = new FileVariantLogDAO();
+      fileVariantLog.variantId = fileVariant.id;
+      fileVariantLog.pluginId = fileVariant.pluginId;
+      fileVariantLog.status = FileVariantStatus.ERROR;
+
+      await this.fileVariantLogRepository.store(fileVariantLog);
+    }
   }
 }

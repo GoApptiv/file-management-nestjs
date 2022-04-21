@@ -20,7 +20,11 @@ export class FileVariantLog extends AbstractEntity {
   @JoinColumn({ name: 'plugin_id' })
   plugin: Plugin;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: FileVariantStatus,
+    default: FileVariantStatus.REQUESTED,
+  })
   status: FileVariantStatus;
 
   @Column({ nullable: true })

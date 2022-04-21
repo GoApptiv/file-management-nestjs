@@ -181,6 +181,10 @@ export class FileController {
     return RestResponse.success(response);
   }
 
+  @ApiOperation({
+    summary: 'Update file variant status',
+    description: 'Update file variant status',
+  })
   @Put('variants')
   async updateFileVariantStatus(
     @Body() dto: UpdateFileVariantStatus,

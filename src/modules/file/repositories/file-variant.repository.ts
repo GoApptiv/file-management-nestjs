@@ -1,11 +1,21 @@
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
 import { FileVariantDAO } from '../dao/file-variant.dao';
 import { FileVariant } from '../entities/file-variant.entity';
 
 @EntityRepository(FileVariant)
 export class FileVariantRepository extends Repository<FileVariant> {
+  /**
+   * Finds entity which matches the id
+   */
+  async findById(
+    id: number,
+    relations?: (keyof FileVariant)[] | string[],
+  ): Promise<FileVariant> {
+    return await this.findOne({ where: { id }, relations: relations });
+  }
+
   /**
    * Creates new record
    */
@@ -44,5 +54,20 @@ export class FileVariantRepository extends Repository<FileVariant> {
   async updateById(id: number, data: FileVariantDAO): Promise<boolean> {
     const update = await this.update({ id }, data);
     return update.affected > 0 ? true : false;
+  }
+
+  /**
+   * Fetch all entities with the given status and before the given date
+   */
+  async fetchByStatusAndBeforeDateTime(
+    status: FileVariantStatus,
+    dateTime: Date,
+  ): Promise<FileVariant[]> {
+    return await this.find({
+      where: {
+        status,
+        createdAt: LessThanOrEqual(dateTime),
+      },
+    });
   }
 }

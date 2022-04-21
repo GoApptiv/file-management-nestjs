@@ -23,6 +23,10 @@ export class FileVariant extends AbstractEntity {
   @Column({ nullable: true })
   storagePath: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: FileVariantStatus,
+    default: FileVariantStatus.REQUESTED,
+  })
   status: FileVariantStatus;
 }

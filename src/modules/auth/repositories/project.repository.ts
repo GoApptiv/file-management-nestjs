@@ -1,4 +1,3 @@
-import { Plugin } from 'src/modules/plugin/entities/plugin.entity';
 import { Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
 import { Project } from '../entities/project.entity';
@@ -6,7 +5,7 @@ import { Project } from '../entities/project.entity';
 @EntityRepository(Project)
 export class ProjectRepository extends Repository<Project> {
   /**
-   * Finds entity which matches the code
+   * Finds entity which matches the id
    */
   async findById(
     id: number,

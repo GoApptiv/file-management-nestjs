@@ -7,6 +7,7 @@ import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PluginModule } from './modules/plugin/plugin.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PluginModule } from './modules/plugin/plugin.module';
       inject: [AppConfigService],
     }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule {}
