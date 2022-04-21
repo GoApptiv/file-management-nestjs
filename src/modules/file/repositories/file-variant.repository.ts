@@ -17,6 +17,17 @@ export class FileVariantRepository extends Repository<FileVariant> {
   }
 
   /**
+   * Fetch entity which matches the file id
+   */
+  async fetchByFileIdAndStatus(
+    fileId: number,
+    status: FileVariantStatus,
+    relations?: (keyof FileVariant)[] | string[],
+  ): Promise<FileVariant[]> {
+    return await this.find({ where: { fileId, status }, relations: relations });
+  }
+
+  /**
    * Creates new record
    */
   async store(data: FileVariantDAO): Promise<FileVariant> {

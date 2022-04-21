@@ -159,13 +159,31 @@ export class FileController {
     return RestResponse.success(result);
   }
 
+  @Get('variants/uuid/:uuid')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'File variants',
+    description: 'Get all file variants',
+  })
+  async createFileVariants(
+    @Param() params: any,
+    @Req() request: Request,
+  ): Promise<ResponseSuccess> {
+    const response = await this.fileService.generateFileVariantReadSignedUrl(
+      params.uuid,
+      request['user'].projectId,
+    );
+
+    return RestResponse.success(response);
+  }
+
   @Post('variants')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'File variants',
     description: 'Creates different file variants',
   })
-  async createFileVariants(
+  async getFileVariantsReadUrl(
     @Body() dto: CreateFileVariantDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess> {

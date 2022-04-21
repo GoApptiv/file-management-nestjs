@@ -40,6 +40,7 @@ import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status
 import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
 import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
 import { Cron } from '@nestjs/schedule';
+import { FileVariantReadResult } from '../results/file-variant-read.result';
 
 @Injectable()
 export class FileService {
@@ -256,6 +257,56 @@ export class FileService {
       uuid,
       processed: true,
     };
+  }
+
+  /**
+   * generate file variant read signed url
+   */
+  async generateFileVariantReadSignedUrl(
+    uuid: string,
+    projectId: number,
+  ): Promise<FileVariantReadResult[]> {
+    const fileVariantsResponse: FileVariantReadResult[] = [];
+
+    const file = await this.fileRepository.findByUuidAndProjectId(
+      uuid,
+      projectId,
+      ['template', 'template.bucketConfig'],
+    );
+
+    if (file === undefined || file.isUploaded === false) {
+      throw new InvalidFileException('File does not exist');
+    }
+
+    const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
+
+    const storage = await this.getCloudStorageService(
+      file.template.bucketConfig,
+    );
+
+    const fileVariants =
+      await this.fileVariantRepository.fetchByFileIdAndStatus(
+        file.id,
+        FileVariantStatus.CREATED,
+        ['plugin'],
+      );
+
+    for (const fileVariant of fileVariants) {
+      const signedUrl = await storage.generateReadSignedUrl(
+        fileVariant.storagePath,
+        expiryTime,
+      );
+
+      const response: FileVariantReadResult = {
+        variantId: fileVariant.id,
+        url: signedUrl,
+        pluginCode: fileVariant.plugin.code,
+      };
+
+      fileVariantsResponse.push(response);
+    }
+
+    return fileVariantsResponse;
   }
 
   /**
