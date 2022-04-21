@@ -35,14 +35,14 @@ export class FileVariantRepository extends Repository<FileVariant> {
   }
 
   /**
-   * Finds entity which matches the fileId and pluginId
+   * Fetch entity which matches the fileId and pluginId
    */
-  async findByFileIdAndPluginId(
+  async fetchByFileIdAndPluginId(
     fileId: number,
     pluginId: number,
     relations?: (keyof FileVariant)[] | string[],
-  ): Promise<FileVariant> {
-    return await this.findOne({
+  ): Promise<FileVariant[]> {
+    return await this.find({
       where: { fileId, pluginId },
       relations: relations,
     });

@@ -43,6 +43,10 @@ export class ProjectService {
       throw new InvalidPluginException('Plugin already registered');
     }
 
+    if (webhookUrl.includes('https') === false) {
+      throw new InvalidPluginException('Webhook URL must be HTTPS');
+    }
+
     // Register the plugin
     const projectPlugin = new ProjectPluginDAO();
     projectPlugin.pluginId = plugin.id;

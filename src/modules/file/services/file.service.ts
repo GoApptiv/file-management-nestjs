@@ -31,7 +31,7 @@ import { FileVariantRepository } from '../repositories/file-variant.repository';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { FileVariantLogRepository } from '../repositories/file-variant-log.repository';
 import { FileVariantLogDAO } from '../dao/file-variant-log.dao';
-import { FileVariantPubSubMessage } from '../interfaces/file-variant-pubsub-message-interface';
+import { FileVariantPubSubMessage } from '../interfaces/file-variant-pubsub-message.interface';
 import { FileVariantCreateResult } from '../results/file-variant-create.result';
 import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
 import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
@@ -287,26 +287,33 @@ export class FileService {
       }
 
       // check if the file variant already exists
-      const fileVariantInSystem =
-        await this.fileVariantRepository.findByFileIdAndPluginId(
+      const fileVariantsInSystem =
+        await this.fileVariantRepository.fetchByFileIdAndPluginId(
           file.id,
           pluginData.id,
         );
 
       // if file variant already exists and not in error and delete state, append the result and skip
-      if (
-        fileVariantInSystem !== undefined &&
-        fileVariantInSystem.status !== FileVariantStatus.ERROR &&
-        fileVariantInSystem.status !== FileVariantStatus.DELETED
-      ) {
-        const response: FileVariantCreateResult = {
-          variantId: fileVariantInSystem.id,
-          pluginCode: plugin.code,
-          status: fileVariantInSystem.status,
-        };
+      let createVariant = true;
 
-        fileVariants.push(response);
-      } else {
+      fileVariantsInSystem.forEach((fileVariant) => {
+        if (
+          [FileVariantStatus.QUEUED, FileVariantStatus.CREATED].includes(
+            fileVariant.status,
+          )
+        ) {
+          const response: FileVariantCreateResult = {
+            variantId: fileVariant.id,
+            pluginCode: plugin.code,
+            status: fileVariant.status,
+          };
+
+          fileVariants.push(response);
+          createVariant = false;
+        }
+      });
+
+      if (createVariant) {
         // create file variant
         const fileVariant = new FileVariantDAO();
         fileVariant.fileId = file.id;

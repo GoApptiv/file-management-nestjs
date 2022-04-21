@@ -30,12 +30,13 @@ import { BulkReadFileDTO } from '../dto/bulk-read-file.dto';
 import { ConfirmFileUploadedDTO } from '../dto/confirm-file-uploaded.dto';
 import { CreateFileVariantDTO } from '../dto/create-file-variant-dto';
 import { RegisterFileDTO } from '../dto/register-file-dto';
-import { UpdateFileVariantStatus } from '../dto/update-file-variant-status.dto';
+import { CfFileVariantStatusResponseDTO } from '../dto/cf-file-variant-response.dto';
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 import { ConfirmUploadResult } from '../results/confirm-upload.result';
 import { ReadSignedUrlResult } from '../results/read-signed-url.result';
 import { WriteSignedUrlResult } from '../results/write-signed-url.result';
 import { FileService } from '../services/file.service';
+import { CfFileVariantResponseMessage } from '../interfaces/cf-file-variant-response-message.interface';
 
 @Controller({
   path: 'files',
@@ -185,16 +186,19 @@ export class FileController {
     summary: 'Update file variant status',
     description: 'Update file variant status',
   })
-  @Put('variants')
+  @Post('variants/cf-status-response')
   async updateFileVariantStatus(
-    @Body() dto: UpdateFileVariantStatus,
+    @Body() dto: CfFileVariantStatusResponseDTO,
   ): Promise<ResponseSuccess> {
+    const buf = Buffer.from(dto.message.data, 'base64');
+    const data: CfFileVariantResponseMessage = JSON.parse(buf.toString());
+
     const response = this.fileService.updateFileVariantByCfResponse(
-      dto.variantId,
+      data.message.variantId,
       new UpdateFileVariantBO({
-        filePath: dto.filePath,
-        fileName: dto.fileName,
-        cfStatus: dto.status,
+        filePath: data.message.filePath,
+        fileName: data.message.fileName,
+        cfStatus: data.message.status,
       }),
     );
     return RestResponse.success(response);
