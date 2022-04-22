@@ -4,12 +4,12 @@ import { RegisterPluginDTO } from 'src/modules/plugin/dto/register-plugin.dto';
 import { ResponseError } from 'src/shared/interfaces/response-error.interface';
 import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
 import { RestResponse } from 'src/shared/services/rest-response.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { ProjectService } from '../services/project.service';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { ProjectService } from '../../services/project.service';
 
 @Controller({
   path: 'projects',
-  version: '1',
+  version: '2',
 })
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}

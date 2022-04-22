@@ -3,11 +3,11 @@ import { Controller } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
 import { RestResponse } from 'src/shared/services/rest-response.service';
-import { PluginService } from '../services/plugin.service';
+import { PluginService } from '../../services/plugin.service';
 
 @Controller({
   path: 'plugins',
-  version: '1',
+  version: '2',
 })
 export class PluginController {
   constructor(private readonly pluginService: PluginService) {}

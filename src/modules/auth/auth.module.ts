@@ -8,7 +8,7 @@ import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { ProjectPluginRegisteredListener } from '../plugin/listeners/project-plugin-registered.listener';
 import { PluginRepository } from '../plugin/repositories/plugin.repository';
 import { ProjectPluginRepository } from '../plugin/repositories/project-plugin.repository';
-import { ProjectController } from './controllers/project.controller';
+import { ProjectController as ProjectControllerV2 } from './controllers/v2/project.controller';
 import { BucketConfigRepository } from './repositories/bucket-config.repository';
 import { ProjectRepository } from './repositories/project.repository';
 import { AuthService } from './services/auth.service';
@@ -35,7 +35,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [AppConfigService],
     }),
   ],
-  controllers: [ProjectController],
+  controllers: [ProjectControllerV2],
   providers: [
     AuthService,
     ProjectService,

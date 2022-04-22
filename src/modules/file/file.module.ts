@@ -5,7 +5,8 @@ import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { BucketConfigRepository } from '../auth/repositories/bucket-config.repository';
 import { ProjectRepository } from '../auth/repositories/project.repository';
 import { PluginRepository } from '../plugin/repositories/plugin.repository';
-import { FileController } from './controllers/file.controller';
+import { FileController as FileControllerV1 } from './controllers/v1/file.controller';
+import { FileController as FileControllerV2 } from './controllers/v2/file.controller';
 import { BulkFileAccessedListener } from './listeners/bulk-file-accessed.listener';
 import { FileAccessedListener } from './listeners/file-accessed.listener';
 import { FileArchiveListener } from './listeners/file-archive.listener';
@@ -31,7 +32,7 @@ import { FileService } from './services/file.service';
       PluginRepository,
     ]),
   ],
-  controllers: [FileController],
+  controllers: [FileControllerV1, FileControllerV2],
   providers: [
     FileService,
     {
