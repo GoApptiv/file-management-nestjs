@@ -440,7 +440,7 @@ export class FileService {
           fileVariantLog.variantId = fileVariant.id;
           fileVariantLog.pluginId = pluginData.id;
           fileVariantLog.status = FileVariantStatus.QUEUED;
-          fileVariantLog.creationTopicMessageId = pubsubMessageId;
+          fileVariantLog.messageId = pubsubMessageId;
 
           await this.fileVariantLogRepository.store(fileVariantLog);
 
@@ -501,6 +501,7 @@ export class FileService {
     fileVariantLog.variantId = variantId;
     fileVariantLog.pluginId = fileVariant.pluginId;
     fileVariantLog.status = status;
+    fileVariantLog.messageId = data.messageId;
 
     await this.fileVariantLogRepository.store(fileVariantLog);
 

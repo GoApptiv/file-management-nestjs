@@ -28,5 +28,5 @@ export class FileVariantLog extends AbstractEntity {
   status: FileVariantStatus;
 
   @Column({ nullable: true })
-  creationTopicMessageId: string;
+  messageId: string;
 }

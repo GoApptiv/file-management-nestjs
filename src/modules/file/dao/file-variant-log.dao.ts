@@ -5,7 +5,7 @@ export class FileVariantLogDAO {
   variantId: number;
   pluginId: number;
   status: FileVariantStatus;
-  creationTopicMessageId: string;
+  messageId: string;
 
   constructor(partial: Partial<FileVariantLogDAO> = {}) {
     Object.assign(this, partial);

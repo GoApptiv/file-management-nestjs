@@ -21,7 +21,7 @@ class MessageDTO {
     example: '2070443601311540',
   })
   @IsString()
-  messageId: number;
+  messageId: string;
 
   @ApiProperty({
     description: 'message publish time',

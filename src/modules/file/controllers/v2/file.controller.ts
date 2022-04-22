@@ -100,6 +100,7 @@ export class FileController {
         filePath: data.message.filePath,
         fileName: data.message.fileName,
         cfStatus: data.message.status,
+        messageId: dto.message.messageId,
       }),
     );
     return RestResponse.success(response);
