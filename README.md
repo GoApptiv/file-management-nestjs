@@ -49,9 +49,3 @@ Run the following command to start the server.
 ```cmd
 npm run start
 ```
-
-## API Collection
-
-Swagger UI is configured for the project. You can visit localhost:port/docs to view the Swagger UI screen.
-
-Enter the username and password which is mentioned inside the .env file.

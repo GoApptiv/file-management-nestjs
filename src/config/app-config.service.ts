@@ -65,13 +65,6 @@ export class AppConfigService {
     };
   }
 
-  get swaggerAuth() {
-    return {
-      userName: this.getString('SWAGGER_USERNAME'),
-      password: this.getString('SWAGGER_PASSWORD'),
-    };
-  }
-
   get typeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: 'mysql',

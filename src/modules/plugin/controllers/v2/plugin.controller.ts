@@ -12,6 +12,9 @@ import { PluginService } from '../../services/plugin.service';
 export class PluginController {
   constructor(private readonly pluginService: PluginService) {}
 
+  /**
+   * fetches plugins.
+   */
   @Get()
   @UseGuards(JwtAuthGuard)
   async index(): Promise<ResponseSuccess> {

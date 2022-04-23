@@ -1,11 +1,5 @@
 import { Get, Param, Put, Req, UseGuards, Request } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiCreatedResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
 import { RestResponse } from 'src/shared/services/rest-response.service';
@@ -21,33 +15,24 @@ import { CfFileVariantResponseMessage } from '../../interfaces/cf-file-variant-r
   path: 'files',
   version: '2',
 })
-@ApiTags('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
+  /**
+   * archives a file.
+   */
   @Put('archive')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'Archive uploaded file',
-    description: 'Archive the uploaded file',
-  })
-  @ApiCreatedResponse({
-    description: 'File archived',
-  })
-  @ApiBadRequestResponse({
-    description: 'Bad request',
-  })
   async archive(@Body() body: ArchiveFileDTO): Promise<ResponseSuccess> {
     const result = await this.fileService.archiveDirectory(body.uuid);
     return RestResponse.success(result);
   }
 
+  /**
+   * generates a signed url for all the variants of the file.
+   */
   @Get('variants/uuid/:uuid')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'File variants',
-    description: 'Get all file variants',
-  })
   async createFileVariants(
     @Param() params: any,
     @Req() request: Request,
@@ -60,12 +45,11 @@ export class FileController {
     return RestResponse.success(response);
   }
 
+  /**
+   * creates a file variant.
+   */
   @Post('variants')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
-    summary: 'File variants',
-    description: 'Creates different file variants',
-  })
   async getFileVariantsReadUrl(
     @Body() body: CreateFileVariantDTO,
     @Req() request: Request,
@@ -83,10 +67,9 @@ export class FileController {
     return RestResponse.success(response);
   }
 
-  @ApiOperation({
-    summary: 'Update file variant status',
-    description: 'Update file variant status',
-  })
+  /**
+   * updates a file variant status from cloud function response.
+   */
   @Post('variants/cf-status-response')
   async updateFileVariantStatus(
     @Body() body: CfFileVariantStatusResponseDTO,

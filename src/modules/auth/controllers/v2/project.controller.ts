@@ -14,6 +14,9 @@ import { ProjectService } from '../../services/project.service';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  /**
+   * registers a plugin for the project.
+   */
   @Post('plugin')
   @UseGuards(JwtAuthGuard)
   async registerPlugin(
