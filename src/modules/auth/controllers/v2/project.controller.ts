@@ -17,12 +17,12 @@ export class ProjectController {
   @Post('plugin')
   @UseGuards(JwtAuthGuard)
   async registerPlugin(
-    @Body() dto: RegisterPluginDTO,
+    @Body() body: RegisterPluginDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess | ResponseError> {
     const success = await this.projectService.registerPlugin(
-      dto.pluginCode,
-      dto.webhookUrl,
+      body.pluginCode,
+      body.webhookUrl,
       request['user'].projectId,
     );
 

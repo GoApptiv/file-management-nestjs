@@ -37,8 +37,8 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  async archive(@Body() dto: ArchiveFileDTO): Promise<ResponseSuccess> {
-    const result = await this.fileService.archiveDirectory(dto.uuid);
+  async archive(@Body() body: ArchiveFileDTO): Promise<ResponseSuccess> {
+    const result = await this.fileService.archiveDirectory(body.uuid);
     return RestResponse.success(result);
   }
 
@@ -67,17 +67,17 @@ export class FileController {
     description: 'Creates different file variants',
   })
   async getFileVariantsReadUrl(
-    @Body() dto: CreateFileVariantDTO,
+    @Body() body: CreateFileVariantDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess> {
-    const createVariant = new CreateFileVariantBO(dto);
+    const createVariant = new CreateFileVariantBO(body);
     const variants = await this.fileService.createFileVariants(
       createVariant,
       request['user'].projectId,
     );
 
     const response = {
-      uuid: dto.uuid,
+      uuid: body.uuid,
       plugin: variants,
     };
     return RestResponse.success(response);
@@ -89,9 +89,9 @@ export class FileController {
   })
   @Post('variants/cf-status-response')
   async updateFileVariantStatus(
-    @Body() dto: CfFileVariantStatusResponseDTO,
+    @Body() body: CfFileVariantStatusResponseDTO,
   ): Promise<ResponseSuccess> {
-    const buf = Buffer.from(dto.message.data, 'base64');
+    const buf = Buffer.from(body.message.data, 'base64');
     const data: CfFileVariantResponseMessage = JSON.parse(buf.toString());
 
     const response = this.fileService.updateFileVariantByCfResponse(
@@ -100,7 +100,7 @@ export class FileController {
         filePath: data.message.filePath,
         fileName: data.message.fileName,
         cfStatus: data.message.status,
-        messageId: dto.message.messageId,
+        messageId: body.message.messageId,
       }),
     );
     return RestResponse.success(response);

@@ -9,9 +9,7 @@ export class PluginService {
   constructor(private readonly pluginRepository: PluginRepository) {}
 
   /**
-   * Returns an action that fetches the plugins.
-   *
-   * @returns arrays of active plugins
+   * returns an action that fetches the plugins.
    */
   async fetch(): Promise<Plugin[]> {
     const filters = new PluginDAO();

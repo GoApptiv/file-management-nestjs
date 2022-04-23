@@ -83,11 +83,11 @@ export class FileController {
     description: 'Bad request',
   })
   getBulkReadUrl(
-    @Body() dto: BulkReadFileDTO,
+    @Body() body: BulkReadFileDTO,
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<BulkReadSignedUrlResult> {
-    const data = new BulkReadFileBo(dto);
+    const data = new BulkReadFileBo(body);
     data.ip = ip;
     data.userAgent = request.headers['user-agent'];
     return this.fileService.bulkGenerateReadSignedUrl(
@@ -110,10 +110,10 @@ export class FileController {
     description: 'Bad request',
   })
   getUploadUrl(
-    @Body() dto: RegisterFileDTO,
+    @Body() body: RegisterFileDTO,
     @Req() request: Request,
   ): Promise<WriteSignedUrlResult> {
-    const registerFile = new RegisterFileBO(dto);
+    const registerFile = new RegisterFileBO(body);
     registerFile.projectId = request['user'].projectId;
     return this.fileService.generateUploadSignedUrl(registerFile);
   }
@@ -130,7 +130,7 @@ export class FileController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  confirm(@Body() dto: ConfirmFileUploadedDTO): Promise<ConfirmUploadResult> {
-    return this.fileService.confirmUpload(dto.uuid);
+  confirm(@Body() body: ConfirmFileUploadedDTO): Promise<ConfirmUploadResult> {
+    return this.fileService.confirmUpload(body.uuid);
   }
 }
