@@ -15,11 +15,11 @@ import { InvalidFileException } from '../exceptions/invalid-file.exception';
 import { RegisterFileBO } from '../bo/register-file.bo';
 import { FileDAO } from '../dao/file.dao';
 import { EventEmitter2 } from 'eventemitter2';
-import { ReadFileBo } from '../bo/read-file.bo';
+import { ReadFileBO } from '../bo/read-file.bo';
 import { FileAccessedEvent } from '../events/file-accessed.event';
 import { ArchiveFileResult } from '../results/archive-file.result';
 import { FileArchiveEvent } from '../events/file-archive.event';
-import { BulkReadFileBo } from '../bo/bulk-read-file.bo';
+import { BulkReadFileBO } from '../bo/bulk-read-file.bo';
 import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 import { InvalidTemplateException } from '../exceptions/invalid-template.exception';
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
@@ -138,7 +138,7 @@ export class FileService {
    * generate read signed url
    */
   async generateReadSignedUrl(
-    data: ReadFileBo,
+    data: ReadFileBO,
     projectId: number,
   ): Promise<ReadSignedUrlResult> {
     const file = await this.fileRepository.findByUuidAndProjectId(
@@ -178,7 +178,7 @@ export class FileService {
    * generates bulk read signed urls
    */
   async bulkGenerateReadSignedUrl(
-    data: BulkReadFileBo,
+    data: BulkReadFileBO,
     projectId: number,
   ): Promise<BulkReadSignedUrlResult> {
     const signedUrls: ReadSignedUrlResult[] = [];

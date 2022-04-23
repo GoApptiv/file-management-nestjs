@@ -10,8 +10,8 @@ import {
 import { Body, Controller, Post } from '@nestjs/common';
 import { RealIP } from 'nestjs-real-ip';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { BulkReadFileBo } from '../../bo/bulk-read-file.bo';
-import { ReadFileBo } from '../../bo/read-file.bo';
+import { BulkReadFileBO } from '../../bo/bulk-read-file.bo';
+import { ReadFileBO } from '../../bo/read-file.bo';
 import { RegisterFileBO } from '../../bo/register-file.bo';
 import { BulkReadFileDTO } from '../../dto/bulk-read-file.dto';
 import { ConfirmFileUploadedDTO } from '../../dto/confirm-file-uploaded.dto';
@@ -39,7 +39,7 @@ export class FileController {
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<ReadSignedUrlResult> {
-    const readFile = new ReadFileBo();
+    const readFile = new ReadFileBO();
     readFile.uuid = params.uuid;
     readFile.ip = ip;
     readFile.userAgent = request.headers['user-agent'];
@@ -60,7 +60,7 @@ export class FileController {
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<BulkReadSignedUrlResult> {
-    const data = new BulkReadFileBo(body);
+    const data = new BulkReadFileBO(body);
     data.ip = ip;
     data.userAgent = request.headers['user-agent'];
     return this.fileService.bulkGenerateReadSignedUrl(

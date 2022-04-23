@@ -1,9 +1,9 @@
-export class ReadFileBo {
+export class ReadFileBO {
   uuid: string;
   ip: string;
   userAgent: string;
 
-  constructor(partial: Partial<ReadFileBo> = {}) {
+  constructor(partial: Partial<ReadFileBO> = {}) {
     Object.assign(this, partial);
   }
 }
