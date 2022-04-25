@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repository';
 import { TemplateRepository } from '../repositories/template.repository';
 import { File } from '../entities/file.entity';
@@ -44,6 +44,8 @@ import { FileVariantReadResult } from '../results/file-variant-read.result';
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
+
   constructor(
     private eventEmitter: EventEmitter2,
     private readonly templateRepository: TemplateRepository,
@@ -61,12 +63,17 @@ export class FileService {
   async generateUploadSignedUrl(
     data: RegisterFileBO,
   ): Promise<WriteSignedUrlResult> {
+    this.logger.log(
+      `GENERATE SIGNED URL: ${data.projectId} : ${data.file.name}`,
+    );
+
     const template = await this.templateRepository.findByCode(
       data.templateCode,
       ['bucketConfig'],
     );
 
     if (template === undefined) {
+      this.logger.error(`INVALID TEMPLATE CODE: ${data.templateCode}`);
       throw new InvalidTemplateException();
     }
 
@@ -75,6 +82,7 @@ export class FileService {
     const archivalDate = moment().add(template.archiveAfterInD, 'days');
 
     if (templateForUuId !== undefined) {
+      this.logger.error(`DUPLICATE REFERENCE NUMBER: ${data.referenceNumber}`);
       throw new DuplicateReferenceNumberException();
     }
 
@@ -109,6 +117,8 @@ export class FileService {
         archivalDate.toDate(),
       );
 
+      this.logger.log(`SIGNED URL GENERATED: ${uuid} for ${data.file.name}`);
+
       return {
         uuid: store.uuid,
         url: signedUrl,
@@ -121,6 +131,8 @@ export class FileService {
    * confirm upload
    */
   async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
+    this.logger.log(`CONFIRM UPLOAD: ${uuid}`);
+
     const updateResult = await this.fileRepository.updateByUuid(
       uuid,
       new FileDAO({
@@ -128,6 +140,9 @@ export class FileService {
         status: FileStatus.UPLOADED,
       }),
     );
+
+    this.logger.log(`CONFIRM UPLOAD COMPLETE: ${uuid}`);
+
     return {
       uuid,
       result: updateResult,
@@ -141,6 +156,8 @@ export class FileService {
     data: ReadFileBO,
     projectId: number,
   ): Promise<ReadSignedUrlResult> {
+    this.logger.log(`GENERATE READ SIGNED URL: ${data.uuid}`);
+
     const file = await this.fileRepository.findByUuidAndProjectId(
       data.uuid,
       projectId,
@@ -148,6 +165,7 @@ export class FileService {
     );
 
     if (file === undefined || file.isUploaded === false) {
+      this.logger.error(`INVALID UUID: ${data.uuid}`);
       throw new InvalidFileException('File does not exist');
     }
 
@@ -161,6 +179,8 @@ export class FileService {
       file.storagePath,
       expiryTime,
     );
+
+    this.logger.log(`READ SIGNED URL GENERATED: ${data.uuid}`);
 
     const fileAccessEvent = new FileAccessedEvent();
     fileAccessEvent.fileId = file.id;
@@ -184,6 +204,10 @@ export class FileService {
     const signedUrls: ReadSignedUrlResult[] = [];
     const uuids = data.uuids;
     const fileAccessEvents: FileAccessedEvent[] = [];
+
+    this.logger.log(
+      `GENERATE BULK READ SIGNED URL: ${uuids.length} UUID COUNT BY ${projectId}`,
+    );
 
     const files = await this.fileRepository.fetchByUuidsAndProjectId(
       uuids,
@@ -221,6 +245,10 @@ export class FileService {
       }
     }
 
+    this.logger.log(
+      `BULK READ SIGNED URL GENERATED: ${uuids.length} UUID COUNT BY ${projectId}`,
+    );
+
     this.eventEmitter.emit('bulk-file.accessed', fileAccessEvents);
 
     return { urls: signedUrls };
@@ -230,9 +258,12 @@ export class FileService {
    * Archive Directory
    */
   async archiveDirectory(uuid: string): Promise<ArchiveFileResult> {
+    this.logger.log(`ARCHIVE DIRECTORY: ${uuid}`);
+
     const file = await this.fileRepository.findByUuid(uuid);
 
     if (file === undefined) {
+      this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
 
@@ -240,16 +271,20 @@ export class FileService {
       file.status !== FileStatus.UPLOADED &&
       file.status !== FileStatus.PROCESSED
     ) {
+      this.logger.error(`INVALID STATUS: ${uuid}`);
       throw new InvalidFileException('File cannot be archived');
     }
 
     if (file.isArchived) {
+      this.logger.error(`ALREADY ARCHIVED: ${uuid}`);
       throw new InvalidFileException('File already archived');
     }
 
     const archiveEvent = new FileArchiveEvent();
     archiveEvent.id = file.id;
     archiveEvent.isDirectory = true;
+
+    this.logger.log(`ARCHIVE DIRECTORY COMPLETE: ${uuid}`);
 
     this.eventEmitter.emit('file.archive', archiveEvent);
 
@@ -268,6 +303,8 @@ export class FileService {
   ): Promise<FileVariantReadResult[]> {
     const fileVariantsResponse: FileVariantReadResult[] = [];
 
+    this.logger.log(`GENERATE FILE VARIANT READ SIGNED URL: ${uuid}`);
+
     const file = await this.fileRepository.findByUuidAndProjectId(
       uuid,
       projectId,
@@ -275,6 +312,7 @@ export class FileService {
     );
 
     if (file === undefined || file.isUploaded === false) {
+      this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
 
@@ -306,6 +344,8 @@ export class FileService {
       fileVariantsResponse.push(response);
     }
 
+    this.logger.log(`FILE VARIANT READ SIGNED URL GENERATED: ${uuid}`);
+
     return fileVariantsResponse;
   }
 
@@ -316,6 +356,10 @@ export class FileService {
     data: CreateFileVariantBO,
     projectId: number,
   ): Promise<FileVariantCreateResult[]> {
+    this.logger.log(
+      `CREATE FILE VARIANT: ${data.uuid} FOR PROJECT: ${projectId}`,
+    );
+
     const uuid = data.uuid;
     const file = await this.fileRepository.findByUuidAndProjectId(
       uuid,
@@ -325,6 +369,7 @@ export class FileService {
 
     // check if file exists
     if (file === undefined || file.isUploaded === false) {
+      this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
 
@@ -359,13 +404,19 @@ export class FileService {
             status: fileVariant.status,
           };
 
+          this.logger.log(
+            `FILE VARIANT ALREADY EXISTS: ${uuid} FOR PLUGIN: ${plugin.code}`,
+          );
+
           fileVariants.push(response);
           createVariant = false;
         }
       });
 
       if (createVariant) {
-        // create file variant
+        this.logger.log(
+          `Creating file variant: ${uuid} for plugin: ${plugin.code}`,
+        );
         const fileVariant = new FileVariantDAO();
         fileVariant.fileId = file.id;
         fileVariant.pluginId = pluginData.id;
@@ -375,7 +426,7 @@ export class FileService {
           file.storagePath,
         );
 
-        // create iam tokens
+        this.logger.log(`Creating IAM token for file variant: ${uuid}`);
         const iamService = await this.getCloudIAMService(
           file.template.bucketConfig.email,
           this.decodeBucketConfigPrivateKey(file.template.bucketConfig.key),
@@ -398,7 +449,9 @@ export class FileService {
           fileVariant,
         );
 
-        // create pub/sub message
+        this.logger.log(
+          `Creating pub/sub message for file variant: ${uuid} and plugin: ${plugin.code}`,
+        );
         const pubsubMessage: FileVariantPubSubMessage = {
           metadata: {
             uuid: file.uuid,
@@ -423,7 +476,9 @@ export class FileService {
           },
         };
 
-        // publish message in pub/sub
+        this.logger.log(
+          `Publishing pub/sub message for file variant: ${uuid} and plugin: ${plugin.code}`,
+        );
         const pubsubMessageId = await this.cloudPubSubService.publishMessage(
           pluginData.cloudFunctionTopic,
           pubsubMessage,
@@ -431,6 +486,9 @@ export class FileService {
 
         // if pub/sub message is published successfully, update file variant status to queued
         if (pubsubMessageId !== null) {
+          this.logger.log(
+            `Pub/sub message published for file variant: ${uuid} and plugin: ${plugin.code}`,
+          );
           await this.fileVariantRepository.updateStatusById(
             fileVariantData.id,
             FileVariantStatus.QUEUED,
@@ -453,6 +511,9 @@ export class FileService {
           fileVariants.push(response);
         } else {
           // if pub/sub message is not published successfully, update file variant status to error
+          this.logger.error(
+            `Pub/sub message not published for file variant: ${uuid} and plugin: ${plugin.code}`,
+          );
           await this.fileVariantRepository.updateStatusById(
             fileVariantData.id,
             FileVariantStatus.ERROR,
@@ -469,6 +530,8 @@ export class FileService {
       }
     }
 
+    this.logger.log(`FILE VARIANTS CREATION QUEUED: ${uuid}`);
+
     return fileVariants;
   }
 
@@ -479,6 +542,10 @@ export class FileService {
     variantId: number,
     data: UpdateFileVariantBO,
   ): Promise<boolean> {
+    this.logger.log(
+      `UPDATING FILE VARIANT: ${variantId} FROM CLOUD FUNCTION RESPONSE`,
+    );
+
     let status = FileVariantStatus.CREATED;
 
     if (data.cfStatus == FileVariantCfStatus.SUCCESS) {
@@ -504,6 +571,8 @@ export class FileService {
     fileVariantLog.messageId = data.messageId;
 
     await this.fileVariantLogRepository.store(fileVariantLog);
+
+    this.logger.log(`FILE VARIANT UPDATED: ${variantId}`);
 
     return update;
   }
@@ -554,10 +623,12 @@ export class FileService {
     );
 
     if (mimeType === undefined) {
+      this.logger.log(`MIME TYPE NOT FOUND: ${fileType}`);
       throw new InvalidFileException('File format not supported');
     }
 
     if (fileSize > template.maxSizeInB) {
+      this.logger.log(`FILE SIZE EXCEEDED: ${fileSize}`);
       throw new InvalidFileException(
         `File size exceeded the maximum size ${template.maxSizeInB}`,
       );
@@ -644,6 +715,7 @@ export class FileService {
   private async failQueuedFileVariantsBeforeMinutes(
     minutes = Number(10),
   ): Promise<void> {
+    this.logger.log(`FAILING QUEUED FILE VARIANTS BEFORE ${minutes} MINUTES`);
     const fileVariants =
       await this.fileVariantRepository.fetchByStatusAndBeforeDateTime(
         FileVariantStatus.QUEUED,
@@ -658,6 +730,10 @@ export class FileService {
         }),
       );
 
+      this.logger.log(
+        `File variant failed to no status update: ${fileVariant.id}`,
+      );
+
       const fileVariantLog = new FileVariantLogDAO();
       fileVariantLog.variantId = fileVariant.id;
       fileVariantLog.pluginId = fileVariant.pluginId;
@@ -665,6 +741,10 @@ export class FileService {
 
       await this.fileVariantLogRepository.store(fileVariantLog);
     }
+
+    this.logger.log(
+      `FAILED QUEUED FILE VARIANTS BEFORE ${minutes} MINUTES COMPLETE`,
+    );
   }
 
   /**
@@ -672,14 +752,18 @@ export class FileService {
    */
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   private async archiveArchivalDatePassedFiles(): Promise<void> {
+    this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED`);
     const files =
       await this.fileRepository.fetchByStatusAndBeforeArchivalDateTime(
         FileStatus.UPLOADED,
         moment().toDate(),
       );
 
+    this.logger.log(`${files.length} FILES FOUND FOR ARCHIVAL`);
+
     for (const file of files) {
       this.archiveDirectory(file.uuid);
     }
+    this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED COMPLETE`);
   }
 }

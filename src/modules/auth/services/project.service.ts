@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProjectPluginDAO } from 'src/modules/plugin/dao/project-plugin.dao';
 import { ProjectPluginRegisteredEvent } from 'src/modules/plugin/events/project-plugin-registered.event';
@@ -10,6 +10,8 @@ import { ProjectRepository } from '../repositories/project.repository';
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly projectPluginRepository: ProjectPluginRepository,
@@ -25,9 +27,14 @@ export class ProjectService {
     webhookUrl: string,
     projectId: number,
   ): Promise<boolean> {
+    this.logger.log(
+      `REGISTER PLUGIN FOR PROJECT ${projectId} WITH PLUGIN CODE ${pluginCode}`,
+    );
+
     const plugin = await this.pluginRepository.findByCode(pluginCode);
 
     if (plugin === undefined) {
+      this.logger.error(`PLUGIN WITH CODE ${pluginCode} NOT FOUND`);
       throw new InvalidPluginException('Plugin does not exist');
     }
 
@@ -40,10 +47,12 @@ export class ProjectService {
       );
 
     if (projectPlugins !== undefined) {
+      this.logger.error(`PLUGIN WITH CODE ${pluginCode} ALREADY REGISTERED`);
       throw new InvalidPluginException('Plugin already registered');
     }
 
     if (webhookUrl.includes('https') === false) {
+      this.logger.error(`WEBHOOK URL MUST CONTAIN HTTPS`);
       throw new InvalidPluginException('Webhook URL must be HTTPS');
     }
 
@@ -70,6 +79,10 @@ export class ProjectService {
     eventData.projectId = projectId;
 
     this.eventEmitter.emit('project-plugin.registered', eventData);
+
+    this.logger.log(
+      `PLUGIN WITH CODE ${pluginCode} REGISTERED FOR PROJECT ${projectId}`,
+    );
 
     return true;
   }
