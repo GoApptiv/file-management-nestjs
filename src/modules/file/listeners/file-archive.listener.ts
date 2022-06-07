@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BucketConfigRepository } from 'src/modules/auth/repositories/bucket-config.repository';
 import { CloudStorageService } from 'src/shared/services/cloud-storage.service';
@@ -9,6 +9,8 @@ import { FileRepository } from '../repositories/file.repository';
 
 @Injectable()
 export class FileArchiveListener {
+  private readonly logger = new Logger(FileArchiveEvent.name);
+
   constructor(
     private readonly fileRepository: FileRepository,
     private readonly bucketConfigRepository: BucketConfigRepository,
@@ -16,6 +18,8 @@ export class FileArchiveListener {
 
   @OnEvent('file.archive')
   async handleFileArchiveEvent(event: FileArchiveEvent) {
+    this.logger.log(`ARCHIVE DIRECTORY STARTED FOR: ${event.id}`);
+
     const file = await this.fileRepository.findOne(event.id);
 
     const bucketConfig = await this.bucketConfigRepository.findByProjectId(
@@ -41,5 +45,7 @@ export class FileArchiveListener {
         isArchived: true,
       }),
     );
+
+    this.logger.log(`ARCHIVE DIRECTORY COMPLETED FOR: ${event.id}`);
   }
 }

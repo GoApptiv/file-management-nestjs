@@ -258,7 +258,7 @@ export class FileService {
    * Archive Directory
    */
   async archiveDirectory(uuid: string): Promise<ArchiveFileResult> {
-    this.logger.log(`ARCHIVE DIRECTORY: ${uuid}`);
+    this.logger.log(`ARCHIVE DIRECTORY CALLED FOR: ${uuid}`);
 
     const file = await this.fileRepository.findByUuid(uuid);
 
@@ -284,9 +284,8 @@ export class FileService {
     archiveEvent.id = file.id;
     archiveEvent.isDirectory = true;
 
-    this.logger.log(`ARCHIVE DIRECTORY COMPLETE: ${uuid}`);
-
     this.eventEmitter.emit('file.archive', archiveEvent);
+    this.logger.log(`ARCHIVE DIRECTORY EVENT EMITTED: ${uuid}`);
 
     return {
       uuid,
