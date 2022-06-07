@@ -20,16 +20,14 @@ export class FileArchiveListener {
   async handleFileArchiveEvent(event: FileArchiveEvent) {
     this.logger.log(`ARCHIVE DIRECTORY STARTED FOR: ${event.id}`);
 
-    const file = await this.fileRepository.findOne(event.id);
-
-    const bucketConfig = await this.bucketConfigRepository.findByProjectId(
-      file.projectId,
-    );
+    const file = await this.fileRepository.findOne(event.id, {
+      relations: ['template', 'template.bucketConfig'],
+    });
 
     const storage = new CloudStorageService(
-      bucketConfig.email,
-      UtilsService.base64decodeKey(bucketConfig.key),
-      bucketConfig.name,
+      file.template.bucketConfig.email,
+      UtilsService.base64decodeKey(file.template.bucketConfig.key),
+      file.template.bucketConfig.name,
     );
 
     if (event.isDirectory) {
