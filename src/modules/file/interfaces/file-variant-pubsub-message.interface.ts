@@ -9,6 +9,7 @@ export interface FileVariantPubSubMessage {
   };
   bucket: {
     source: {
+      readSignedUrl: string;
       bucketName: string;
       accessToken: string;
       path: string;

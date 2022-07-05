@@ -182,14 +182,16 @@ export class FileService {
 
     this.logger.log(`READ SIGNED URL GENERATED: ${data.uuid}`);
 
-    const fileAccessEvent = new FileAccessedEvent();
-    fileAccessEvent.fileId = file.id;
-    fileAccessEvent.ip = data.ip;
-    fileAccessEvent.projectId = file.projectId;
-    fileAccessEvent.userAgent = data.userAgent;
-    fileAccessEvent.isArchived = file.isArchived;
+    if (data.ip) {
+      const fileAccessEvent = new FileAccessedEvent();
+      fileAccessEvent.fileId = file.id;
+      fileAccessEvent.ip = data.ip;
+      fileAccessEvent.projectId = file.projectId;
+      fileAccessEvent.userAgent = data.userAgent;
+      fileAccessEvent.isArchived = file.isArchived;
 
-    this.eventEmitter.emit('file.accessed', fileAccessEvent);
+      this.eventEmitter.emit('file.accessed', fileAccessEvent);
+    }
 
     return { uuid: data.uuid, url: signedUrl };
   }
@@ -443,6 +445,14 @@ export class FileService {
           GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
         );
 
+        const readSignedUrlData = new ReadFileBO();
+        readSignedUrlData.uuid = uuid;
+
+        const readSignedUrl = await this.generateReadSignedUrl(
+          readSignedUrlData,
+          projectId,
+        );
+
         // store data in file variant
         const fileVariantData = await this.fileVariantRepository.store(
           fileVariant,
@@ -462,6 +472,7 @@ export class FileService {
           },
           bucket: {
             source: {
+              readSignedUrl: readSignedUrl.url,
               bucketName: file.template.bucketConfig.name,
               accessToken: bucketReadOnlyToken.accessToken,
               path: fileStoragePath.filePath,
