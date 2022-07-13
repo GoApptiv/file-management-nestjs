@@ -19,8 +19,8 @@ async function bootstrap() {
     logger: WinstonModule.createLogger({
       transports: [
         new winston.transports.File({
-          dirname: 'logs',
-          filename: 'combined.log',
+          dirname: `logs/${new Date().getFullYear()}/${new Date().getMonth()}`,
+          filename: `${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDate()}.log`,
           format: winston.format.combine(
             winston.format.timestamp(),
             nestWinstonModuleUtilities.format.nestLike(),
