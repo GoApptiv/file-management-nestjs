@@ -54,7 +54,7 @@ export class FileController {
     @Body() body: CreateFileVariantDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess> {
-    const createVariant = new CreateFileVariantBO(body);
+    const createVariant: CreateFileVariantBO = { ...body };
     const variants = await this.fileService.createFileVariants(
       createVariant,
       request['user'].projectId,
@@ -77,14 +77,16 @@ export class FileController {
     const buf = Buffer.from(body.message.data, 'base64');
     const data: CfFileVariantResponseMessage = JSON.parse(buf.toString());
 
+    const updateData: UpdateFileVariantBO = {
+      filePath: data.message.filePath,
+      fileName: data.message.fileName,
+      cfStatus: data.message.status,
+      messageId: body.message.messageId,
+    };
+
     const response = this.fileService.updateFileVariantByCfResponse(
       data.message.variantId,
-      new UpdateFileVariantBO({
-        filePath: data.message.filePath,
-        fileName: data.message.fileName,
-        cfStatus: data.message.status,
-        messageId: body.message.messageId,
-      }),
+      updateData,
     );
     return RestResponse.success(response);
   }

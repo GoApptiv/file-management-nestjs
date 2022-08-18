@@ -2,11 +2,7 @@ class PluginBO {
   code: string;
 }
 
-export class CreateFileVariantBO {
+export interface CreateFileVariantBO {
   uuid: string;
   plugins: PluginBO[];
-
-  constructor(partial: Partial<CreateFileVariantBO> = {}) {
-    Object.assign(this, partial);
-  }
 }

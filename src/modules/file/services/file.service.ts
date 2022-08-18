@@ -457,8 +457,9 @@ export class FileService {
           GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS,
         );
 
-        const readSignedUrlData = new ReadFileBO();
-        readSignedUrlData.uuid = uuid;
+        const readSignedUrlData: ReadFileBO = {
+          uuid,
+        };
 
         const readSignedUrl = await this.generateReadSignedUrl(
           readSignedUrlData,

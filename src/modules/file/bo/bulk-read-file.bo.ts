@@ -1,9 +1,5 @@
-export class BulkReadFileBO {
+export interface BulkReadFileBO {
   uuids: [];
   ip: string;
   userAgent: string;
-
-  constructor(partial: Partial<BulkReadFileBO> = {}) {
-    Object.assign(this, partial);
-  }
 }

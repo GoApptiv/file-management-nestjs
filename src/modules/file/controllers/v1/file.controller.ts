@@ -39,10 +39,11 @@ export class FileController {
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<ReadSignedUrlResult> {
-    const readFile = new ReadFileBO();
-    readFile.uuid = params.uuid;
-    readFile.ip = ip;
-    readFile.userAgent = request.headers['user-agent'];
+    const readFile: ReadFileBO = {
+      uuid: params.uuid,
+      ip,
+      userAgent: request.headers['user-agent'],
+    };
     return this.fileService.generateReadSignedUrl(
       readFile,
       request['user'].projectId,
@@ -61,9 +62,11 @@ export class FileController {
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<BulkReadSignedUrlResult> {
-    const data = new BulkReadFileBO(body);
-    data.ip = ip;
-    data.userAgent = request.headers['user-agent'];
+    const data: BulkReadFileBO = {
+      ...body,
+      ip,
+      userAgent: request.headers['user-agent'],
+    };
     return this.fileService.bulkGenerateReadSignedUrl(
       data,
       request['user'].projectId,
@@ -80,8 +83,10 @@ export class FileController {
     @Body() body: RegisterFileDTO,
     @Req() request: Request,
   ): Promise<WriteSignedUrlResult> {
-    const registerFile = new RegisterFileBO(body);
-    registerFile.projectId = request['user'].projectId;
+    const registerFile: RegisterFileBO = {
+      ...body,
+      projectId: request['user'].projectId,
+    };
     return this.fileService.generateUploadSignedUrl(registerFile);
   }
 

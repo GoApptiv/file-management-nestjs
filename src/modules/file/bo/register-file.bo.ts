@@ -4,13 +4,9 @@ class FileBo {
   type: string;
 }
 
-export class RegisterFileBO {
+export interface RegisterFileBO {
   templateCode: string;
   referenceNumber: string;
   projectId: number;
   file: FileBo;
-
-  constructor(partial: Partial<RegisterFileBO> = {}) {
-    Object.assign(this, partial);
-  }
 }
