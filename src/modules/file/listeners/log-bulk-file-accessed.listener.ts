@@ -5,7 +5,7 @@ import { FileAccessedEvent } from '../events/file-accessed.event';
 import { AccessLogRepository } from '../repositories/access-log.repository';
 
 @Injectable()
-export class BulkFileAccessedListener {
+export class LogBulkFileAccessedListener {
   constructor(private readonly accessLogRepository: AccessLogRepository) {}
 
   @OnEvent('bulk-file.accessed')

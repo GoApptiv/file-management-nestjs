@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BucketConfigRepository } from 'src/modules/auth/repositories/bucket-config.repository';
 import { CloudStorageService } from 'src/shared/services/cloud-storage.service';
 import { UtilsService } from 'src/shared/services/utils.service';
 import { FileDAO } from '../dao/file.dao';
@@ -8,13 +7,10 @@ import { FileArchiveEvent } from '../events/file-archive.event';
 import { FileRepository } from '../repositories/file.repository';
 
 @Injectable()
-export class FileArchiveListener {
+export class AchiveFileListener {
   private readonly logger = new Logger(FileArchiveEvent.name);
 
-  constructor(
-    private readonly fileRepository: FileRepository,
-    private readonly bucketConfigRepository: BucketConfigRepository,
-  ) {}
+  constructor(private readonly fileRepository: FileRepository) {}
 
   @OnEvent('file.archive')
   async handleFileArchiveEvent(event: FileArchiveEvent) {
