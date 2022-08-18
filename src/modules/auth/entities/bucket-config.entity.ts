@@ -13,9 +13,4 @@ export class BucketConfig extends AbstractEntity {
   @Exclude()
   @Column({ type: 'longtext' })
   key: string;
-
-  constructor(partial: Partial<BucketConfig>) {
-    super();
-    Object.assign(this, partial);
-  }
 }

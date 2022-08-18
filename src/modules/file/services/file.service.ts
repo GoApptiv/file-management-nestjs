@@ -155,16 +155,20 @@ export class FileService {
   async generateReadSignedUrl(
     data: ReadFileBO,
     projectId: number,
+    isAdmin = false,
   ): Promise<ReadSignedUrlResult> {
     this.logger.log(`GENERATE READ SIGNED URL: ${data.uuid}`);
 
-    const file = await this.fileRepository.findByUuidAndProjectId(
-      data.uuid,
-      projectId,
-      ['template', 'template.bucketConfig'],
-    );
+    const file = await this.fileRepository.findByUuid(data.uuid, [
+      'template',
+      'template.bucketConfig',
+    ]);
 
-    if (file === undefined || file.isUploaded === false) {
+    if (
+      file === undefined ||
+      file.isUploaded === false ||
+      (!isAdmin && file.projectId !== projectId)
+    ) {
       this.logger.error(`INVALID UUID: ${data.uuid}`);
       throw new InvalidFileException('File does not exist');
     }
@@ -186,7 +190,7 @@ export class FileService {
       const fileAccessEvent = new FileAccessedEvent();
       fileAccessEvent.fileId = file.id;
       fileAccessEvent.ip = data.ip;
-      fileAccessEvent.projectId = file.projectId;
+      fileAccessEvent.projectId = projectId;
       fileAccessEvent.userAgent = data.userAgent;
       fileAccessEvent.isArchived = file.isArchived;
 
@@ -202,6 +206,7 @@ export class FileService {
   async bulkGenerateReadSignedUrl(
     data: BulkReadFileBO,
     projectId: number,
+    isAdmin = false,
   ): Promise<BulkReadSignedUrlResult> {
     const signedUrls: ReadSignedUrlResult[] = [];
     const uuids = data.uuids;
@@ -211,11 +216,18 @@ export class FileService {
       `GENERATE BULK READ SIGNED URL: ${uuids.length} UUID COUNT BY ${projectId}`,
     );
 
-    const files = await this.fileRepository.fetchByUuidsAndProjectId(
-      uuids,
-      projectId,
-      ['template', 'template.bucketConfig'],
-    );
+    const files = await this.fileRepository.fetchByUuids(uuids, [
+      'template',
+      'template.bucketConfig',
+    ]);
+
+    if (!isAdmin) {
+      files.forEach((file: File) => {
+        if (file.projectId !== projectId) {
+          throw new InvalidFileException('File does not exist');
+        }
+      });
+    }
 
     for (const file of files) {
       if (file.isUploaded) {
