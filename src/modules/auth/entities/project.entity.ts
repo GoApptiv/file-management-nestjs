@@ -10,6 +10,9 @@ export class Project extends AbstractEntity {
   @Column({ unique: true })
   code: string;
 
+  @Column({ default: false })
+  isAdmin: boolean;
+
   @OneToMany(() => Plugin, (plugin) => plugin.projects)
   @JoinTable({ name: 'project_plugins' })
   plugins: Plugin[];
