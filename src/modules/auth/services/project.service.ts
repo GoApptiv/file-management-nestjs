@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ProjectPluginDAO } from 'src/modules/plugin/dao/project-plugin.dao';
+import { StoreProjectPluginDAO } from 'src/modules/plugin/dao/project-plugin.dao';
 import { ProjectPluginRegisteredEvent } from 'src/modules/plugin/events/project-plugin-registered.event';
 import { InvalidPluginException } from 'src/modules/plugin/exceptions/invalid-plugin.exception';
 import { PluginRepository } from 'src/modules/plugin/repositories/plugin.repository';
@@ -57,13 +57,16 @@ export class ProjectService {
     }
 
     // Register the plugin
-    const projectPlugin = new ProjectPluginDAO();
-    projectPlugin.pluginId = plugin.id;
-    projectPlugin.projectId = projectId;
-    projectPlugin.webhookUrl = webhookUrl;
-    projectPlugin.pubsubStatusSubscriber =
-      this.generatePluginStatusSubscriberName(plugin.code, project.code);
-    projectPlugin.status = Status.INACTIVE;
+    const projectPlugin: StoreProjectPluginDAO = {
+      pluginId: plugin.id,
+      projectId,
+      webhookUrl,
+      pubsubStatusSubscriber: this.generatePluginStatusSubscriberName(
+        plugin.code,
+        project.code,
+      ),
+      status: Status.INACTIVE,
+    };
 
     const mapProjectPlugin = await this.projectPluginRepository.store(
       projectPlugin,
@@ -73,7 +76,7 @@ export class ProjectService {
       return false;
     }
 
-    // Raise event
+    // raise event
     const eventData = new ProjectPluginRegisteredEvent();
     eventData.pluginId = plugin.id;
     eventData.projectId = projectId;

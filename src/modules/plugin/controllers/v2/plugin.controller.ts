@@ -13,7 +13,7 @@ export class PluginController {
   constructor(private readonly pluginService: PluginService) {}
 
   /**
-   * fetches plugins.
+   * fetch plugins
    */
   @Get()
   @UseGuards(JwtAuthGuard)

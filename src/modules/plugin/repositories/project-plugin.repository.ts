@@ -1,7 +1,7 @@
 import { Status } from 'src/shared/constants/status.enum';
 import { Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
-import { ProjectPluginDAO } from '../dao/project-plugin.dao';
+import { StoreProjectPluginDAO } from '../dao/project-plugin.dao';
 import { ProjectPlugin } from '../entities/project-plugin.entity';
 
 @EntityRepository(ProjectPlugin)
@@ -9,7 +9,7 @@ export class ProjectPluginRepository extends Repository<ProjectPlugin> {
   /**
    * Creates new record
    */
-  async store(data: ProjectPluginDAO): Promise<ProjectPlugin> {
+  async store(data: StoreProjectPluginDAO): Promise<ProjectPlugin> {
     return await this.save(data);
   }
 

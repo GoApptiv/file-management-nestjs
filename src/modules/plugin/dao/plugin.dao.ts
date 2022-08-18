@@ -1,14 +1,14 @@
 import { Status } from 'src/shared/constants/status.enum';
 
-export class PluginDAO {
+interface Plugin {
   id: number;
   name: string;
   code: string;
   cloudFunctionTopic: string;
   cloudFunctionResponseTopic: string;
   status: Status;
-
-  constructor(partial: Partial<PluginDAO> = {}) {
-    Object.assign(this, partial);
-  }
 }
+
+export type StorePluginDAO = Plugin;
+
+export type FilterPluginDAO = Pick<Plugin, 'status'>;

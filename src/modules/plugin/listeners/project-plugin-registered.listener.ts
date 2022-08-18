@@ -8,7 +8,7 @@ import { PluginRepository } from '../repositories/plugin.repository';
 import { ProjectPluginRepository } from '../repositories/project-plugin.repository';
 
 @Injectable()
-export class ProjectPluginRegisteredListener {
+export class RegisterPluginStatusSubscriberListener {
   constructor(
     private readonly projectPluginRepository: ProjectPluginRepository,
     private readonly pluginRepository: PluginRepository,

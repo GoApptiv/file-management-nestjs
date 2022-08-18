@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
-import { PluginDAO } from '../dao/plugin.dao';
+import { FilterPluginDAO } from '../dao/plugin.dao';
 import { Plugin } from '../entities/plugin.entity';
 
 @EntityRepository(Plugin)
@@ -10,7 +10,7 @@ export class PluginRepository extends Repository<Plugin> {
    */
   async fetch(
     select: (keyof Plugin)[] = [],
-    filters: PluginDAO,
+    filters: FilterPluginDAO,
   ): Promise<Plugin[]> {
     return await this.find({
       select: select.length > 0 ? select : null,
@@ -23,7 +23,7 @@ export class PluginRepository extends Repository<Plugin> {
   }
 
   /**
-   * Finds entity which matches the id
+   * finds entity which matches the id
    */
   async findById(
     id: number,
@@ -33,7 +33,7 @@ export class PluginRepository extends Repository<Plugin> {
   }
 
   /**
-   * Finds entity which matches the code
+   * finds entity which matches the code
    */
   async findByCode(
     code: string,

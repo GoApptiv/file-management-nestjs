@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfigService } from 'src/config/app-config.service';
 import { AppConfigModule } from 'src/config/config.module';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
-import { ProjectPluginRegisteredListener } from '../plugin/listeners/project-plugin-registered.listener';
 import { PluginRepository } from '../plugin/repositories/plugin.repository';
 import { ProjectPluginRepository } from '../plugin/repositories/project-plugin.repository';
 import { ProjectController as ProjectControllerV2 } from './controllers/v2/project.controller';
@@ -50,7 +49,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       },
       inject: [AppConfigService],
     },
-    ProjectPluginRegisteredListener,
     JwtStrategy,
   ],
   exports: [AuthService],
