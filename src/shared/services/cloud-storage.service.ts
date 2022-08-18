@@ -7,6 +7,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import moment from 'moment';
 import { BucketType } from '../constants/bucket-type.enum';
+import { UtilsService } from './utils.service';
 
 @Injectable()
 export class CloudStorageService {
@@ -25,6 +26,7 @@ export class CloudStorageService {
         private_key: privateKey,
         client_email: email,
       },
+      projectId: UtilsService.extractProjectIdFromGcpEmailId(email),
     });
     this.bucket = this.storage.bucket(bucket);
   }

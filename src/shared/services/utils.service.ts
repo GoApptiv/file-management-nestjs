@@ -25,4 +25,11 @@ export class UtilsService {
   static base64decodeKey(encodedKey: string): string {
     return Buffer.from(encodedKey, 'base64').toString().replace(/\\n/gm, '\n');
   }
+
+  /**
+   * extract project id from gcp email id
+   */
+  static extractProjectIdFromGcpEmailId(email: string): string {
+    return email.split('@')[1].replace('.iam.gserviceaccount.com', '');
+  }
 }

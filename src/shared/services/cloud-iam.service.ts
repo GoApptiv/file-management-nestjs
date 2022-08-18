@@ -1,5 +1,6 @@
 import { IAMCredentialsClient } from '@google-cloud/iam-credentials';
 import { Injectable } from '@nestjs/common';
+import { UtilsService } from './utils.service';
 
 @Injectable()
 export class CloudIAMService {
@@ -16,6 +17,7 @@ export class CloudIAMService {
         client_email: email,
         private_key: privateKey,
       },
+      projectId: UtilsService.extractProjectIdFromGcpEmailId(email),
     });
   }
 
