@@ -13,7 +13,7 @@ import { UtilsService } from 'src/shared/services/utils.service';
 import { DuplicateReferenceNumberException } from '../exceptions/duplicate-reference-number.exception';
 import { InvalidFileException } from '../exceptions/invalid-file.exception';
 import { RegisterFileBO } from '../bo/register-file.bo';
-import { FileDAO } from '../dao/file.dao';
+import { StoreFileDAO } from '../dao/file.dao';
 import { EventEmitter2 } from 'eventemitter2';
 import { ReadFileBO } from '../bo/read-file.bo';
 import { FileAccessedEvent } from '../events/file-accessed.event';
@@ -24,13 +24,13 @@ import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 import { InvalidTemplateException } from '../exceptions/invalid-template.exception';
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 import { CreateFileVariantBO } from '../bo/create-file-variant.bo';
-import { FileVariantDAO } from '../dao/file-variant.dao';
+import { StoreFileVariantDAO } from '../dao/file-variant.dao';
 import { PluginRepository } from 'src/modules/plugin/repositories/plugin.repository';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import { FileVariantRepository } from '../repositories/file-variant.repository';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { FileVariantLogRepository } from '../repositories/file-variant-log.repository';
-import { FileVariantLogDAO } from '../dao/file-variant-log.dao';
+import { StoreFileVarianLogDAO } from '../dao/file-variant-log.dao';
 import { FileVariantPubSubMessage } from '../interfaces/file-variant-pubsub-message.interface';
 import { FileVariantCreateResult } from '../results/file-variant-create.result';
 import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
@@ -133,13 +133,12 @@ export class FileService {
   async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
     this.logger.log(`CONFIRM UPLOAD: ${uuid}`);
 
-    const updateResult = await this.fileRepository.updateByUuid(
-      uuid,
-      new FileDAO({
-        isUploaded: true,
-        status: FileStatus.UPLOADED,
-      }),
-    );
+    const updateResult =
+      await this.fileRepository.updateStatusAndIsUploadedByUuid(
+        uuid,
+        FileStatus.UPLOADED,
+        true,
+      );
 
     this.logger.log(`CONFIRM UPLOAD COMPLETE: ${uuid}`);
 
@@ -430,10 +429,11 @@ export class FileService {
         this.logger.log(
           `Creating file variant: ${uuid} for plugin: ${plugin.code}`,
         );
-        const fileVariant = new FileVariantDAO();
-        fileVariant.fileId = file.id;
-        fileVariant.pluginId = pluginData.id;
-        fileVariant.status = FileVariantStatus.REQUESTED;
+        const fileVariant: StoreFileVariantDAO = {
+          fileId: file.id,
+          pluginId: pluginData.id,
+          status: FileVariantStatus.REQUESTED,
+        };
 
         const fileStoragePath = this.generateFileNamePathFromStoragePath(
           file.storagePath,
@@ -516,16 +516,17 @@ export class FileService {
             FileVariantStatus.QUEUED,
           );
 
-          const fileVariantLog = new FileVariantLogDAO();
-          fileVariantLog.variantId = fileVariant.id;
-          fileVariantLog.pluginId = pluginData.id;
-          fileVariantLog.status = FileVariantStatus.QUEUED;
-          fileVariantLog.messageId = pubsubMessageId;
+          const fileVariantLog: StoreFileVarianLogDAO = {
+            variantId: fileVariantData.id,
+            pluginId: pluginData.id,
+            status: FileVariantStatus.QUEUED,
+            messageId: pubsubMessageId,
+          };
 
           await this.fileVariantLogRepository.store(fileVariantLog);
 
           const response: FileVariantCreateResult = {
-            variantId: fileVariant.id,
+            variantId: fileVariantData.id,
             pluginCode: plugin.code,
             status: FileVariantStatus.QUEUED,
           };
@@ -542,7 +543,7 @@ export class FileService {
           );
 
           const response: FileVariantCreateResult = {
-            variantId: fileVariant.id,
+            variantId: fileVariantData.id,
             pluginCode: plugin.code,
             status: FileVariantStatus.ERROR,
           };
@@ -576,21 +577,21 @@ export class FileService {
       status = FileVariantStatus.ERROR;
     }
 
-    const update = await this.fileVariantRepository.updateById(
-      variantId,
-      new FileVariantDAO({
-        status: status,
-        storagePath: data.filePath.replace(/\/$/, '') + '/' + data.fileName,
-      }),
-    );
+    const update =
+      await this.fileVariantRepository.updateStatusAndStoragePathById(
+        variantId,
+        status,
+        data.filePath.replace(/\/$/, '') + '/' + data.fileName,
+      );
 
     const fileVariant = await this.fileVariantRepository.findById(variantId);
 
-    const fileVariantLog = new FileVariantLogDAO();
-    fileVariantLog.variantId = variantId;
-    fileVariantLog.pluginId = fileVariant.pluginId;
-    fileVariantLog.status = status;
-    fileVariantLog.messageId = data.messageId;
+    const fileVariantLog: StoreFileVarianLogDAO = {
+      variantId: variantId,
+      pluginId: fileVariant.pluginId,
+      status: status,
+      messageId: data.messageId,
+    };
 
     await this.fileVariantLogRepository.store(fileVariantLog);
 
@@ -611,18 +612,19 @@ export class FileService {
   ): Promise<File> {
     const mimeType = await this.mimeTypeRepository.findByType(data.file.type);
 
-    const file = new FileDAO();
-    file.fileSize = data.file.size;
-    file.uuid = uuid;
-    file.isArchived = false;
-    file.isUploaded = false;
-    file.status = FileStatus.REQUESTED;
-    file.storagePath = storagePath;
-    file.referenceNumber = data.referenceNumber;
-    file.projectId = data.projectId;
-    file.mimeTypeId = mimeType.id;
-    file.templateId = templateId;
-    file.archivalDate = archivalDate;
+    const file: StoreFileDAO = {
+      fileSize: data.file.size,
+      uuid: uuid,
+      isArchived: false,
+      isUploaded: false,
+      status: FileStatus.REQUESTED,
+      storagePath: storagePath,
+      referenceNumber: data.referenceNumber,
+      projectId: data.projectId,
+      mimeTypeId: mimeType.id,
+      templateId: templateId,
+      archivalDate: archivalDate,
+    };
 
     return this.fileRepository.store(file);
   }
@@ -745,21 +747,21 @@ export class FileService {
       );
 
     for (const fileVariant of fileVariants) {
-      await this.fileVariantRepository.updateById(
+      await this.fileVariantRepository.updateStatusById(
         fileVariant.id,
-        new FileVariantDAO({
-          status: FileVariantStatus.ERROR,
-        }),
+        FileVariantStatus.ERROR,
       );
 
       this.logger.log(
         `File variant failed to no status update: ${fileVariant.id}`,
       );
 
-      const fileVariantLog = new FileVariantLogDAO();
-      fileVariantLog.variantId = fileVariant.id;
-      fileVariantLog.pluginId = fileVariant.pluginId;
-      fileVariantLog.status = FileVariantStatus.ERROR;
+      const fileVariantLog: StoreFileVarianLogDAO = {
+        variantId: fileVariant.id,
+        pluginId: fileVariant.pluginId,
+        status: FileVariantStatus.ERROR,
+        messageId: '',
+      };
 
       await this.fileVariantLogRepository.store(fileVariantLog);
     }

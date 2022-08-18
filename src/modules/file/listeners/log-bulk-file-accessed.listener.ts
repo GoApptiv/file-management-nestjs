@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { AccessLogDAO } from '../dao/access-log.dao';
+import { StoreAccessLogDAO } from '../dao/access-log.dao';
 import { FileAccessedEvent } from '../events/file-accessed.event';
 import { AccessLogRepository } from '../repositories/access-log.repository';
 
@@ -10,8 +10,12 @@ export class LogBulkFileAccessedListener {
 
   @OnEvent('bulk-file.accessed')
   handleFileAccessedEvent(event: FileAccessedEvent[]) {
-    const logs: AccessLogDAO[] = [];
-    event.forEach((accessEvent) => logs.push(new AccessLogDAO(accessEvent)));
+    const logs: StoreAccessLogDAO[] = [];
+    event.forEach((accessEvent) =>
+      logs.push({
+        ...accessEvent,
+      }),
+    );
 
     this.accessLogRepository.bulkStore(logs);
   }

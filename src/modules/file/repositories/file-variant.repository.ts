@@ -1,7 +1,7 @@
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
-import { FileVariantDAO } from '../dao/file-variant.dao';
+import { StoreFileVariantDAO } from '../dao/file-variant.dao';
 import { FileVariant } from '../entities/file-variant.entity';
 
 @EntityRepository(FileVariant)
@@ -30,7 +30,7 @@ export class FileVariantRepository extends Repository<FileVariant> {
   /**
    * Creates new record
    */
-  async store(data: FileVariantDAO): Promise<FileVariant> {
+  async store(data: StoreFileVariantDAO): Promise<FileVariant> {
     return await this.save(data);
   }
 
@@ -60,10 +60,14 @@ export class FileVariantRepository extends Repository<FileVariant> {
   }
 
   /**
-   * Updates the data by id
+   * update the status and storagePath by id
    */
-  async updateById(id: number, data: FileVariantDAO): Promise<boolean> {
-    const update = await this.update({ id }, data);
+  async updateStatusAndStoragePathById(
+    id: number,
+    status: FileVariantStatus,
+    storagePath: string,
+  ): Promise<boolean> {
+    const update = await this.update({ id }, { status, storagePath });
     return update.affected > 0 ? true : false;
   }
 

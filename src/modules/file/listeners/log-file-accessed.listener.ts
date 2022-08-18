@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { AccessLogDAO } from '../dao/access-log.dao';
+import { StoreAccessLogDAO } from '../dao/access-log.dao';
 import { FileAccessedEvent } from '../events/file-accessed.event';
 import { AccessLogRepository } from '../repositories/access-log.repository';
 
@@ -10,7 +10,9 @@ export class LogFileAccessedListener {
 
   @OnEvent('file.accessed')
   handleFileAccessedEvent(event: FileAccessedEvent) {
-    const log = new AccessLogDAO(event);
+    const log: StoreAccessLogDAO = {
+      ...event,
+    };
     this.accessLogRepository.store(log);
   }
 }

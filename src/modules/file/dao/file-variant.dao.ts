@@ -1,13 +1,10 @@
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 
-export class FileVariantDAO {
-  id: number;
+export class FileVariant {
   fileId: number;
   pluginId: number;
-  storagePath: string;
+  storagePath?: string;
   status: FileVariantStatus;
-
-  constructor(partial: Partial<FileVariantDAO> = {}) {
-    Object.assign(this, partial);
-  }
 }
+
+export type StoreFileVariantDAO = FileVariant;

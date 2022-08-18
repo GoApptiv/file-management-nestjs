@@ -1,7 +1,6 @@
 import { FileStatus } from 'src/shared/constants/file-status.enum';
 
-export class FileDAO {
-  id: number;
+interface File {
   uuid: string;
   referenceNumber: string;
   status: FileStatus;
@@ -13,8 +12,6 @@ export class FileDAO {
   mimeTypeId: number;
   projectId: number;
   archivalDate: Date;
-
-  constructor(partial: Partial<FileDAO> = {}) {
-    Object.assign(this, partial);
-  }
 }
+
+export type StoreFileDAO = File;

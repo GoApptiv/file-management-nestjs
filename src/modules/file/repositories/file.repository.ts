@@ -1,7 +1,7 @@
 import { FileStatus } from 'src/shared/constants/file-status.enum';
 import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { EntityRepository } from 'typeorm/decorator/EntityRepository';
-import { FileDAO } from '../dao/file.dao';
+import { StoreFileDAO } from '../dao/file.dao';
 import { File } from '../entities/file.entity';
 
 @EntityRepository(File)
@@ -9,7 +9,7 @@ export class FileRepository extends Repository<File> {
   /**
    * Creates new record
    */
-  async store(data: FileDAO): Promise<File> {
+  async store(data: StoreFileDAO): Promise<File> {
     return await this.save(data);
   }
 
@@ -70,10 +70,25 @@ export class FileRepository extends Repository<File> {
   }
 
   /**
-   * Updates the data by uuid
+   * update the status and isUploaded by uuid
    */
-  async updateByUuid(uuid: string, data: FileDAO): Promise<boolean> {
-    const update = await this.update({ uuid }, data);
+  async updateStatusAndIsUploadedByUuid(
+    uuid: string,
+    status: FileStatus,
+    isUploaded: boolean,
+  ): Promise<boolean> {
+    const update = await this.update({ uuid }, { status, isUploaded });
+    return update.affected > 0 ? true : false;
+  }
+
+  /**
+   * update isArchived by uuid
+   */
+  async updateIsArchivedByUuid(
+    uuid: string,
+    isArchived: boolean,
+  ): Promise<boolean> {
+    const update = await this.update({ uuid }, { isArchived });
     return update.affected > 0 ? true : false;
   }
 

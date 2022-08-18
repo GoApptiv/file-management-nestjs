@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CloudStorageService } from 'src/shared/services/cloud-storage.service';
 import { UtilsService } from 'src/shared/services/utils.service';
-import { FileDAO } from '../dao/file.dao';
 import { FileArchiveEvent } from '../events/file-archive.event';
 import { FileRepository } from '../repositories/file.repository';
 
@@ -33,12 +32,7 @@ export class AchiveFileListener {
       await storage.setStorageClassToArchive(file.storagePath);
     }
 
-    this.fileRepository.updateByUuid(
-      file.uuid,
-      new FileDAO({
-        isArchived: true,
-      }),
-    );
+    this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
 
     this.logger.log(`ARCHIVE DIRECTORY COMPLETED FOR: ${event.id}`);
   }
