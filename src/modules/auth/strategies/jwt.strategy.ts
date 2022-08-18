@@ -23,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       projectCode: payload.username,
       projectId: project.id,
+      isAdmin: project.isAdmin,
     };
   }
 }

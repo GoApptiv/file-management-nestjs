@@ -46,6 +46,7 @@ export class FileController {
     return this.fileService.generateReadSignedUrl(
       readFile,
       request['user'].projectId,
+      request['user'].isAdmin,
     );
   }
 
@@ -66,6 +67,7 @@ export class FileController {
     return this.fileService.bulkGenerateReadSignedUrl(
       data,
       request['user'].projectId,
+      request['user'].isAdmin,
     );
   }
 
