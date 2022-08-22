@@ -49,13 +49,14 @@ export class FileController {
       ip,
       userAgent: request.headers['user-agent'],
     };
-    return RestResponse.success(
-      this.fileService.generateReadSignedUrl(
-        readFile,
-        request['user'].projectId,
-        request['user'].isAdmin,
-      ),
+
+    const result = await this.fileService.generateReadSignedUrl(
+      readFile,
+      request['user'].projectId,
+      request['user'].isAdmin,
     );
+
+    return RestResponse.success(result);
   }
 
   /**
@@ -74,13 +75,14 @@ export class FileController {
       ip,
       userAgent: request.headers['user-agent'],
     };
-    return RestResponse.success(
-      this.fileService.bulkGenerateReadSignedUrl(
-        data,
-        request['user'].projectId,
-        request['user'].isAdmin,
-      ),
+
+    const result = await this.fileService.bulkGenerateReadSignedUrl(
+      data,
+      request['user'].projectId,
+      request['user'].isAdmin,
     );
+
+    return RestResponse.success(result);
   }
 
   /**
@@ -96,9 +98,10 @@ export class FileController {
       ...body,
       projectId: request['user'].projectId,
     };
-    return RestResponse.success(
-      this.fileService.generateUploadSignedUrl(registerFile),
-    );
+
+    const result = await this.fileService.generateUploadSignedUrl(registerFile);
+
+    return RestResponse.success(result);
   }
 
   /**
@@ -109,7 +112,8 @@ export class FileController {
   async confirm(
     @Body() body: ConfirmFileUploadedDTO,
   ): Promise<ResponseSuccess> {
-    return RestResponse.success(this.fileService.confirmUpload(body.uuid));
+    const result = await this.fileService.confirmUpload(body.uuid);
+    return RestResponse.success(result);
   }
 
   /**
@@ -129,13 +133,14 @@ export class FileController {
    */
   @Get('variants/uuid/:uuid')
   @UseGuards(JwtAuthGuard)
-  async createFileVariants(
+  async getFileVariantsReadUrl(
     @Param() params: any,
     @Req() request: Request,
   ): Promise<ResponseSuccess | ResponseError> {
     const response = await this.fileService.generateFileVariantReadSignedUrl(
       params.uuid,
       request['user'].projectId,
+      request['user'].isAdmin,
     );
 
     return RestResponse.success(response);
@@ -146,7 +151,7 @@ export class FileController {
    */
   @Post('variants')
   @UseGuards(JwtAuthGuard)
-  async getFileVariantsReadUrl(
+  async createFileVariants(
     @Body() body: CreateFileVariantDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess | ResponseError> {
@@ -156,11 +161,11 @@ export class FileController {
       request['user'].projectId,
     );
 
-    const response = {
+    const result = {
       uuid: body.uuid,
       plugin: variants,
     };
-    return RestResponse.success(response);
+    return RestResponse.success(result);
   }
 
   /**
@@ -180,10 +185,10 @@ export class FileController {
       messageId: body.message.messageId,
     };
 
-    const response = this.fileService.updateFileVariantByCfResponse(
+    const result = this.fileService.updateFileVariantByCfResponse(
       data.message.variantId,
       updateData,
     );
-    return RestResponse.success(response);
+    return RestResponse.success(result);
   }
 }

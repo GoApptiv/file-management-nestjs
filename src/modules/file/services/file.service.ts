@@ -223,7 +223,7 @@ export class FileService {
     if (!isAdmin) {
       files.forEach((file: File) => {
         if (file.projectId !== projectId) {
-          throw new InvalidFileException('File does not exist');
+          files.splice(files.indexOf(file), 1);
         }
       });
     }
@@ -312,18 +312,22 @@ export class FileService {
   async generateFileVariantReadSignedUrl(
     uuid: string,
     projectId: number,
+    isAdmin = false,
   ): Promise<FileVariantReadResult[]> {
     const fileVariantsResponse: FileVariantReadResult[] = [];
 
     this.logger.log(`GENERATE FILE VARIANT READ SIGNED URL: ${uuid}`);
 
-    const file = await this.fileRepository.findByUuidAndProjectId(
-      uuid,
-      projectId,
-      ['template', 'template.bucketConfig'],
-    );
+    const file = await this.fileRepository.findByUuid(uuid, [
+      'template',
+      'template.bucketConfig',
+    ]);
 
-    if (file === undefined || file.isUploaded === false) {
+    if (
+      file === undefined ||
+      file.isUploaded === false ||
+      (!isAdmin && file.projectId !== projectId)
+    ) {
       this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
