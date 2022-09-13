@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN npx nest build
 
 EXPOSE 80
 CMD ["node", "start"]
