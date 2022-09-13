@@ -40,12 +40,12 @@ export class FileController {
   @Get('uuid/:uuid')
   @UseGuards(JwtAuthGuard)
   async getReadUrl(
-    @Param() params: any,
+    @Param('uuid') uuid: string,
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<ResponseSuccess | ResponseError> {
     const readFile: ReadFileBO = {
-      uuid: params.uuid,
+      uuid,
       ip,
       userAgent: request.headers['user-agent'],
     };
@@ -134,11 +134,11 @@ export class FileController {
   @Get('variants/uuid/:uuid')
   @UseGuards(JwtAuthGuard)
   async getFileVariantsReadUrl(
-    @Param() params: any,
+    @Param('uuid') uuid: string,
     @Req() request: Request,
   ): Promise<ResponseSuccess | ResponseError> {
     const response = await this.fileService.generateFileVariantReadSignedUrl(
-      params.uuid,
+      uuid,
       request['user'].projectId,
       request['user'].isAdmin,
     );

@@ -35,12 +35,12 @@ export class FileController {
   @Get('uuid/:uuid')
   @UseGuards(JwtAuthGuard)
   getReadUrl(
-    @Param() params: any,
+    @Param('uuid') uuid: string,
     @Req() request: Request,
     @RealIP() ip: string,
   ): Promise<ReadSignedUrlResult> {
     const readFile: ReadFileBO = {
-      uuid: params.uuid,
+      uuid,
       ip,
       userAgent: request.headers['user-agent'],
     };

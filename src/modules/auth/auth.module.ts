@@ -24,9 +24,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       ProjectPluginRepository,
     ]),
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_TOKEN_SECRET,
-    }),
     JwtModule.registerAsync({
       imports: [AppConfigModule],
       useFactory: (configService: AppConfigService) => {
