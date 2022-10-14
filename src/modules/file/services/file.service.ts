@@ -779,20 +779,31 @@ export class FileService {
   /**
    * archive the file which passed the archival date
    */
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   private async archiveArchivalDatePassedFiles(): Promise<void> {
     this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED`);
-    const files =
-      await this.fileRepository.fetchByStatusAndBeforeArchivalDateTime(
-        FileStatus.UPLOADED,
-        moment().toDate(),
-      );
 
-    this.logger.log(`${files.length} FILES FOUND FOR ARCHIVAL`);
+    let allFilesFetched = false;
 
-    for (const file of files) {
-      this.archiveDirectory(file.uuid);
+    while (!allFilesFetched) {
+      const files =
+        await this.fileRepository.fetchByStatusAndBeforeArchivalDateTimeAndIsArchivedStatus(
+          FileStatus.UPLOADED,
+          moment().toDate(),
+          false,
+          5000,
+        );
+
+      this.logger.log(`${files.length} FILES FOUND FOR ARCHIVAL`);
+
+      for (const file of files) {
+        this.archiveDirectory(file.uuid);
+      }
+      this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED COMPLETE`);
+
+      if (files.length < 5000) {
+        allFilesFetched = true;
+      }
     }
-    this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED COMPLETE`);
   }
 }

@@ -95,15 +95,19 @@ export class FileRepository extends Repository<File> {
   /**
    * Fetch all entities with the given status and before the given date
    */
-  async fetchByStatusAndBeforeArchivalDateTime(
+  fetchByStatusAndBeforeArchivalDateTimeAndIsArchivedStatus(
     status: FileStatus,
     dateTime: Date,
+    isArchived: boolean,
+    limit: number,
   ): Promise<File[]> {
-    return await this.find({
+    return this.find({
       where: {
         status,
+        isArchived: false,
         archivalDate: LessThanOrEqual(dateTime),
       },
+      take: limit,
     });
   }
 }
