@@ -779,7 +779,7 @@ export class FileService {
   /**
    * archive the file which passed the archival date
    */
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   private async archiveArchivalDatePassedFiles(): Promise<void> {
     this.logger.log(`ARCHIVING FILES WITH ARCHIVAL DATE PASSED`);
 
