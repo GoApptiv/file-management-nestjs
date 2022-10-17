@@ -275,7 +275,7 @@ export class FileService {
 
     const file = await this.fileRepository.findByUuid(uuid);
 
-    if (file === undefined) {
+    if (!file) {
       this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
