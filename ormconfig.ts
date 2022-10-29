@@ -11,9 +11,6 @@ const config: ConnectionOptions = {
   synchronize: false,
   entities: ['dist/src/modules/**/entities/*.entity{.ts,.js}'],
   migrations: ['dist/src/database/migrations/*{.ts,.js}'],
-  cli: {
-    migrationsDir: 'src/database/migrations',
-  },
   namingStrategy: new SnakeNamingStrategy(),
 };
 

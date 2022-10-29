@@ -15,7 +15,8 @@ export class AchiveFileListener {
   async handleFileArchiveEvent(event: FileArchiveEvent) {
     this.logger.log(`ARCHIVE DIRECTORY STARTED FOR: ${event.id}`);
 
-    const file = await this.fileRepository.findOne(event.id, {
+    const file = await this.fileRepository.findOne({
+      where: { id: event.id },
       relations: ['template', 'template.bucketConfig'],
     });
 

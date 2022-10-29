@@ -1,7 +1,7 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
-import * as helmet from 'helmet';
+import helmet from 'helmet';
 import {
   WinstonModule,
   utilities as nestWinstonModuleUtilities,
