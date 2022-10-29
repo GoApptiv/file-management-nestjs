@@ -1,9 +1,13 @@
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { Template } from '../entities/template.entity';
 
-@EntityRepository(Template)
+@Injectable()
 export class TemplateRepository extends Repository<Template> {
+  constructor(dataSource: DataSource) {
+    super(Template, dataSource.manager);
+  }
+
   /**
    * Finds entity which matches the type
    */

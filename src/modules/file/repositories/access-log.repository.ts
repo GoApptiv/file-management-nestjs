@@ -1,10 +1,14 @@
-import { getConnection, InsertResult, Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, getConnection, InsertResult, Repository } from 'typeorm';
 import { StoreAccessLogDAO } from '../dao/access-log.dao';
 import { AccessLog } from '../entities/access-log.entity';
 
-@EntityRepository(AccessLog)
+@Injectable()
 export class AccessLogRepository extends Repository<AccessLog> {
+  constructor(dataSource: DataSource) {
+    super(AccessLog, dataSource.manager);
+  }
+
   /**
    * Creates new record
    */

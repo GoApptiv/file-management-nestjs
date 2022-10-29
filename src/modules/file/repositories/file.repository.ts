@@ -1,11 +1,15 @@
+import { Injectable } from '@nestjs/common';
 import { FileStatus } from 'src/shared/constants/file-status.enum';
-import { In, LessThanOrEqual, Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { DataSource, In, LessThanOrEqual, Repository } from 'typeorm';
 import { StoreFileDAO } from '../dao/file.dao';
 import { File } from '../entities/file.entity';
 
-@EntityRepository(File)
+@Injectable()
 export class FileRepository extends Repository<File> {
+  constructor(dataSource: DataSource) {
+    super(File, dataSource.manager);
+  }
+
   /**
    * Creates new record
    */

@@ -1,11 +1,15 @@
+import { Injectable } from '@nestjs/common';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
-import { LessThanOrEqual, Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
 import { StoreFileVariantDAO } from '../dao/file-variant.dao';
 import { FileVariant } from '../entities/file-variant.entity';
 
-@EntityRepository(FileVariant)
+@Injectable()
 export class FileVariantRepository extends Repository<FileVariant> {
+  constructor(dataSource: DataSource) {
+    super(FileVariant, dataSource.manager);
+  }
+
   /**
    * Finds entity which matches the id
    */

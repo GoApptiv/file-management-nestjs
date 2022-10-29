@@ -1,11 +1,15 @@
+import { Injectable } from '@nestjs/common';
 import { Status } from 'src/shared/constants/status.enum';
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { DataSource, Repository } from 'typeorm';
 import { StoreProjectPluginDAO } from '../dao/project-plugin.dao';
 import { ProjectPlugin } from '../entities/project-plugin.entity';
 
-@EntityRepository(ProjectPlugin)
+@Injectable()
 export class ProjectPluginRepository extends Repository<ProjectPlugin> {
+  constructor(dataSource: DataSource) {
+    super(ProjectPlugin, dataSource.manager);
+  }
+
   /**
    * Creates new record
    */

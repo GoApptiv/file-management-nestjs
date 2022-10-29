@@ -1,6 +1,10 @@
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { BucketConfig } from '../entities/bucket-config.entity';
 
-@EntityRepository(BucketConfig)
-export class BucketConfigRepository extends Repository<BucketConfig> {}
+@Injectable()
+export class BucketConfigRepository extends Repository<BucketConfig> {
+  constructor(dataSource: DataSource) {
+    super(BucketConfig, dataSource.manager);
+  }
+}

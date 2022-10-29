@@ -5,10 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfigService } from 'src/config/app-config.service';
 import { AppConfigModule } from 'src/config/config.module';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
+import { Plugin } from '../plugin/entities/plugin.entity';
+import { ProjectPlugin } from '../plugin/entities/project-plugin.entity';
 import { RegisterPluginStatusSubscriberListener } from '../plugin/listeners/project-plugin-registered.listener';
 import { PluginRepository } from '../plugin/repositories/plugin.repository';
 import { ProjectPluginRepository } from '../plugin/repositories/project-plugin.repository';
 import { ProjectController as ProjectControllerV2 } from './controllers/v2/project.controller';
+import { BucketConfig } from './entities/bucket-config.entity';
+import { Project } from './entities/project.entity';
 import { BucketConfigRepository } from './repositories/bucket-config.repository';
 import { ProjectRepository } from './repositories/project.repository';
 import { AuthService } from './services/auth.service';
@@ -17,12 +21,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ProjectRepository,
-      BucketConfigRepository,
-      PluginRepository,
-      ProjectPluginRepository,
-    ]),
+    TypeOrmModule.forFeature([BucketConfig, Plugin, ProjectPlugin, Project]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [AppConfigModule],
@@ -49,6 +48,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     },
     RegisterPluginStatusSubscriberListener,
     JwtStrategy,
+    ProjectRepository,
+    ProjectPluginRepository,
+    PluginRepository,
+    BucketConfigRepository,
   ],
   exports: [AuthService],
 })

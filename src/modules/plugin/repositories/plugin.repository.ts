@@ -1,10 +1,14 @@
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { FilterPluginDAO } from '../dao/plugin.dao';
 import { Plugin } from '../entities/plugin.entity';
 
-@EntityRepository(Plugin)
+@Injectable()
 export class PluginRepository extends Repository<Plugin> {
+  constructor(dataSource: DataSource) {
+    super(Plugin, dataSource.manager);
+  }
+
   /**
    * Returns an action that fetches the plugins
    */

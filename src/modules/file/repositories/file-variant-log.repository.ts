@@ -1,10 +1,15 @@
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { StoreFileVarianLogDAO } from '../dao/file-variant-log.dao';
 import { FileVariantLog } from '../entities/file-variant-log.entity';
+import { FileVariant } from '../entities/file-variant.entity';
 
-@EntityRepository(FileVariantLog)
+@Injectable()
 export class FileVariantLogRepository extends Repository<FileVariantLog> {
+  constructor(dataSource: DataSource) {
+    super(FileVariant, dataSource.manager);
+  }
+
   /**
    * Creates new record
    */

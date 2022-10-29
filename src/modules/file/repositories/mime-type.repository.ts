@@ -1,9 +1,13 @@
-import { Repository } from 'typeorm';
-import { EntityRepository } from 'typeorm/decorator/EntityRepository';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { MimeType } from '../entities/mime-type.entity';
 
-@EntityRepository(MimeType)
+@Injectable()
 export class MimeTypeRepository extends Repository<MimeType> {
+  constructor(dataSource: DataSource) {
+    super(MimeType, dataSource.manager);
+  }
+
   /**
    * Finds entity which matches the type
    */

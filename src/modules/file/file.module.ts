@@ -17,19 +17,28 @@ import { FileRepository } from './repositories/file.repository';
 import { MimeTypeRepository } from './repositories/mime-type.repository';
 import { TemplateRepository } from './repositories/template.repository';
 import { FileService } from './services/file.service';
+import { File } from './entities/file.entity';
+import { Template } from './entities/template.entity';
+import { MimeType } from './entities/mime-type.entity';
+import { BucketConfig } from '../auth/entities/bucket-config.entity';
+import { Project } from '../auth/entities/project.entity';
+import { AccessLog } from './entities/access-log.entity';
+import { FileVariantLog } from './entities/file-variant-log.entity';
+import { FileVariant } from './entities/file-variant.entity';
+import { Plugin } from '../plugin/entities/plugin.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      FileRepository,
-      TemplateRepository,
-      MimeTypeRepository,
-      AccessLogRepository,
-      ProjectRepository,
-      BucketConfigRepository,
-      FileVariantRepository,
-      FileVariantLogRepository,
-      PluginRepository,
+      File,
+      Template,
+      MimeType,
+      AccessLog,
+      Project,
+      BucketConfig,
+      FileVariant,
+      FileVariantLog,
+      Plugin,
     ]),
   ],
   controllers: [FileControllerV1, FileControllerV2],
@@ -49,6 +58,15 @@ import { FileService } from './services/file.service';
     LogFileAccessedListener,
     AchiveFileListener,
     LogBulkFileAccessedListener,
+    FileRepository,
+    TemplateRepository,
+    MimeTypeRepository,
+    AccessLogRepository,
+    ProjectRepository,
+    BucketConfigRepository,
+    FileVariantRepository,
+    FileVariantLogRepository,
+    PluginRepository,
   ],
 })
 export class FileModule {}
