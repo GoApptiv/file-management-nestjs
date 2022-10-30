@@ -18,7 +18,7 @@ export class AppConfigService {
 
   private getNumber(key: string, defaultValue?: number): number {
     const value = this.configService.get(key, defaultValue);
-    if (value === undefined) {
+    if (!value) {
       throw new Error(key + ' env var not set');
     }
     try {
@@ -30,7 +30,7 @@ export class AppConfigService {
 
   private getBoolean(key: string, defaultValue?: boolean): boolean {
     const value = this.configService.get(key, defaultValue?.toString());
-    if (value === undefined) {
+    if (!value) {
       throw new Error(key + ' env var not set');
     }
     try {

@@ -33,7 +33,7 @@ export class ProjectService {
 
     const plugin = await this.pluginRepository.findByCode(pluginCode);
 
-    if (plugin === undefined) {
+    if (!plugin) {
       this.logger.error(`PLUGIN WITH CODE ${pluginCode} NOT FOUND`);
       throw new InvalidPluginException('Plugin does not exist');
     }
@@ -46,7 +46,7 @@ export class ProjectService {
         plugin.id,
       );
 
-    if (projectPlugins !== undefined) {
+    if (projectPlugins) {
       this.logger.error(`PLUGIN WITH CODE ${pluginCode} ALREADY REGISTERED`);
       throw new InvalidPluginException('Plugin already registered');
     }
@@ -72,7 +72,7 @@ export class ProjectService {
       projectPlugin,
     );
 
-    if (mapProjectPlugin == undefined) {
+    if (!mapProjectPlugin) {
       return false;
     }
 

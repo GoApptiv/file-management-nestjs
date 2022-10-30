@@ -72,7 +72,7 @@ export class FileService {
       ['bucketConfig'],
     );
 
-    if (template === undefined) {
+    if (!template) {
       this.logger.error(`INVALID TEMPLATE CODE: ${data.templateCode}`);
       throw new InvalidTemplateException();
     }
@@ -81,7 +81,7 @@ export class FileService {
     const templateForUuId = await this.fileRepository.findByUuid(uuid);
     const archivalDate = moment().add(template.archiveAfterInD, 'days');
 
-    if (templateForUuId !== undefined) {
+    if (templateForUuId) {
       this.logger.error(`DUPLICATE REFERENCE NUMBER: ${data.referenceNumber}`);
       throw new DuplicateReferenceNumberException();
     }
@@ -164,7 +164,7 @@ export class FileService {
     ]);
 
     if (
-      file === undefined ||
+      !file ||
       file.isUploaded === false ||
       (!isAdmin && file.projectId !== projectId)
     ) {
@@ -324,7 +324,7 @@ export class FileService {
     ]);
 
     if (
-      file === undefined ||
+      !file ||
       file.isUploaded === false ||
       (!isAdmin && file.projectId !== projectId)
     ) {
@@ -384,7 +384,7 @@ export class FileService {
     );
 
     // check if file exists
-    if (file === undefined || file.isUploaded === false) {
+    if (!file || file.isUploaded === false) {
       this.logger.error(`INVALID UUID: ${uuid}`);
       throw new InvalidFileException('File does not exist');
     }
@@ -394,7 +394,7 @@ export class FileService {
     for (const plugin of data.plugins) {
       const pluginData = await this.pluginRepository.findByCode(plugin.code);
 
-      if (pluginData === undefined) {
+      if (!pluginData) {
         throw new InvalidPluginCodeException();
       }
 
@@ -651,7 +651,7 @@ export class FileService {
       (mimeType) => mimeType.type === fileType,
     );
 
-    if (mimeType === undefined) {
+    if (!mimeType) {
       this.logger.log(`MIME TYPE NOT FOUND: ${fileType}`);
       throw new InvalidFileException('File format not supported');
     }

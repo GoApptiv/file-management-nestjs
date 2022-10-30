@@ -13,29 +13,29 @@ export class FileVariantRepository extends Repository<FileVariant> {
   /**
    * Finds entity which matches the id
    */
-  async findById(
+  findById(
     id: number,
     relations?: (keyof FileVariant)[] | string[],
   ): Promise<FileVariant> {
-    return await this.findOne({ where: { id }, relations: relations });
+    return this.findOne({ where: { id }, relations: relations });
   }
 
   /**
    * Fetch entity which matches the file id
    */
-  async fetchByFileIdAndStatus(
+  fetchByFileIdAndStatus(
     fileId: number,
     status: FileVariantStatus,
     relations?: (keyof FileVariant)[] | string[],
   ): Promise<FileVariant[]> {
-    return await this.find({ where: { fileId, status }, relations: relations });
+    return this.find({ where: { fileId, status }, relations: relations });
   }
 
   /**
    * Creates new record
    */
-  async store(data: StoreFileVariantDAO): Promise<FileVariant> {
-    return await this.save(data);
+  store(data: StoreFileVariantDAO): Promise<FileVariant> {
+    return this.save(data);
   }
 
   /**
@@ -52,12 +52,12 @@ export class FileVariantRepository extends Repository<FileVariant> {
   /**
    * Fetch entity which matches the fileId and pluginId
    */
-  async fetchByFileIdAndPluginId(
+  fetchByFileIdAndPluginId(
     fileId: number,
     pluginId: number,
     relations?: (keyof FileVariant)[] | string[],
   ): Promise<FileVariant[]> {
-    return await this.find({
+    return this.find({
       where: { fileId, pluginId },
       relations: relations,
     });
@@ -78,11 +78,11 @@ export class FileVariantRepository extends Repository<FileVariant> {
   /**
    * Fetch all entities with the given status and before the given date
    */
-  async fetchByStatusAndBeforeDateTime(
+  fetchByStatusAndBeforeDateTime(
     status: FileVariantStatus,
     dateTime: Date,
   ): Promise<FileVariant[]> {
-    return await this.find({
+    return this.find({
       where: {
         status,
         createdAt: LessThanOrEqual(dateTime),

@@ -11,20 +11,20 @@ export class ProjectRepository extends Repository<Project> {
   /**
    * Finds entity which matches the id
    */
-  async findById(
+  findById(
     id: number,
     relations?: (keyof Project)[] | string[],
   ): Promise<Project> {
-    return await this.findOne({ where: { id }, relations: relations });
+    return this.findOne({ where: { id }, relations: relations });
   }
 
   /**
    * Finds entity which matches the code
    */
-  async findByCode(
+  findByCode(
     code: string,
     relations?: (keyof Project)[] | string[],
   ): Promise<Project> {
-    return await this.findOne({ where: { code }, relations: relations });
+    return this.findOne({ where: { code }, relations: relations });
   }
 }

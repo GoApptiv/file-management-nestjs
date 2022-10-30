@@ -13,29 +13,29 @@ export class FileRepository extends Repository<File> {
   /**
    * Creates new record
    */
-  async store(data: StoreFileDAO): Promise<File> {
-    return await this.save(data);
+  store(data: StoreFileDAO): Promise<File> {
+    return this.save(data);
   }
 
   /**
    * Finds entity which matches the uuid
    */
-  async findByUuid(
+  findByUuid(
     uuid: string,
     relations?: (keyof File)[] | string[],
   ): Promise<File> {
-    return await this.findOne({ where: { uuid }, relations: relations });
+    return this.findOne({ where: { uuid }, relations: relations });
   }
 
   /**
    * Finds entity which matches the uuid and projectId
    */
-  async findByUuidAndProjectId(
+  findByUuidAndProjectId(
     uuid: string,
     projectId: number,
     relations?: (keyof File)[] | string[],
   ): Promise<File> {
-    return await this.findOne({
+    return this.findOne({
       where: { uuid, projectId },
       relations: relations,
     });
@@ -44,11 +44,11 @@ export class FileRepository extends Repository<File> {
   /**
    * Fetch entity which matches the uuids
    */
-  async fetchByUuids(
+  fetchByUuids(
     uuids: [],
     relations?: (keyof File)[] | string[],
   ): Promise<File[]> {
-    return await this.find({
+    return this.find({
       where: {
         uuid: In(uuids),
       },
@@ -59,12 +59,12 @@ export class FileRepository extends Repository<File> {
   /**
    * Fetch entity which matches the uuids and projectId
    */
-  async fetchByUuidsAndProjectId(
+  fetchByUuidsAndProjectId(
     uuids: [],
     projectId: number,
     relations?: (keyof File)[] | string[],
   ): Promise<File[]> {
-    return await this.find({
+    return this.find({
       where: {
         uuid: In(uuids),
         projectId,
@@ -108,7 +108,7 @@ export class FileRepository extends Repository<File> {
     return this.find({
       where: {
         status,
-        isArchived: false,
+        isArchived,
         archivalDate: LessThanOrEqual(dateTime),
       },
       take: limit,

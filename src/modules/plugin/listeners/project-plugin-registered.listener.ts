@@ -41,7 +41,7 @@ export class RegisterPluginStatusSubscriberListener {
       subscriberOption,
     );
 
-    if (subscriber !== undefined) {
+    if (subscriber) {
       await this.projectPluginRepository.updateStatusByProjectIdAndPluginId(
         Status.ACTIVE,
         event.projectId,

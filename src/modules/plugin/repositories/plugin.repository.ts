@@ -12,11 +12,11 @@ export class PluginRepository extends Repository<Plugin> {
   /**
    * Returns an action that fetches the plugins
    */
-  async fetch(
+  fetch(
     select: (keyof Plugin)[] = [],
     filters: FilterPluginDAO,
   ): Promise<Plugin[]> {
-    return await this.find({
+    return this.find({
       select: select.length > 0 ? select : null,
       where: [
         {
@@ -29,20 +29,20 @@ export class PluginRepository extends Repository<Plugin> {
   /**
    * finds entity which matches the id
    */
-  async findById(
+  findById(
     id: number,
     relations?: (keyof Plugin)[] | string[],
   ): Promise<Plugin> {
-    return await this.findOne({ where: { id }, relations: relations });
+    return this.findOne({ where: { id }, relations: relations });
   }
 
   /**
    * finds entity which matches the code
    */
-  async findByCode(
+  findByCode(
     code: string,
     relations?: (keyof Plugin)[] | string[],
   ): Promise<Plugin> {
-    return await this.findOne({ where: { code }, relations: relations });
+    return this.findOne({ where: { code }, relations: relations });
   }
 }

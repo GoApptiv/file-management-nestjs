@@ -13,18 +13,18 @@ export class ProjectPluginRepository extends Repository<ProjectPlugin> {
   /**
    * Creates new record
    */
-  async store(data: StoreProjectPluginDAO): Promise<ProjectPlugin> {
-    return await this.save(data);
+  store(data: StoreProjectPluginDAO): Promise<ProjectPlugin> {
+    return this.save(data);
   }
 
   /**
    * Finds entity which matches the projectId and pluginId
    */
-  async findByProjectIdAndPluginId(
+  findByProjectIdAndPluginId(
     projectId: number,
     pluginId: number,
   ): Promise<ProjectPlugin> {
-    return await this.findOne({
+    return this.findOne({
       where: { projectId, pluginId },
     });
   }
