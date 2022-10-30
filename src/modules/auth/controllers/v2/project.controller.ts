@@ -1,9 +1,11 @@
+import {
+  GaRestResponse,
+  ResponseError,
+  ResponseSuccess,
+} from '@goapptiv/rest-response-nestjs';
 import { Body, Post, Req, UseGuards, Request } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
 import { RegisterPluginDTO } from 'src/modules/plugin/dto/register-plugin.dto';
-import { ResponseError } from 'src/shared/interfaces/response-error.interface';
-import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
-import { RestResponse } from 'src/shared/services/rest-response.service';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ProjectService } from '../../services/project.service';
 
@@ -30,9 +32,9 @@ export class ProjectController {
     );
 
     if (!success) {
-      return RestResponse.error('Error while adding plugin', {});
+      return GaRestResponse.error('Error while adding plugin', {});
     }
 
-    return RestResponse.success('Plugin added successfully');
+    return GaRestResponse.success('Plugin added successfully');
   }
 }

@@ -9,8 +9,6 @@ import {
 } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
-import { ResponseSuccess } from 'src/shared/interfaces/response-success.interface';
-import { RestResponse } from 'src/shared/services/rest-response.service';
 import { CreateFileVariantBO } from '../../bo/create-file-variant.bo';
 import { UpdateFileVariantBO } from '../../bo/update-file-variant.bo';
 import { ArchiveFileDTO } from '../../dto/archive-file.dto';
@@ -18,7 +16,6 @@ import { CreateFileVariantDTO } from '../../dto/create-file-variant-dto';
 import { CfFileVariantStatusResponseDTO } from '../../dto/cf-file-variant-response.dto';
 import { FileService } from '../../services/file.service';
 import { CfFileVariantResponseMessage } from '../../interfaces/cf-file-variant-response-message.interface';
-import { ResponseError } from 'src/shared/interfaces/response-error.interface';
 import { RealIP } from 'nestjs-real-ip';
 import { ReadFileBO } from '../../bo/read-file.bo';
 import { BulkReadFileDTO } from '../../dto/bulk-read-file.dto';
@@ -26,6 +23,11 @@ import { BulkReadFileBO } from '../../bo/bulk-read-file.bo';
 import { RegisterFileDTO } from '../../dto/register-file-dto';
 import { RegisterFileBO } from '../../bo/register-file.bo';
 import { ConfirmFileUploadedDTO } from '../../dto/confirm-file-uploaded.dto';
+import {
+  GaRestResponse,
+  ResponseError,
+  ResponseSuccess,
+} from '@goapptiv/rest-response-nestjs';
 
 @Controller({
   path: 'files',
@@ -56,7 +58,7 @@ export class FileController {
       request['user'].isAdmin,
     );
 
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -82,7 +84,7 @@ export class FileController {
       request['user'].isAdmin,
     );
 
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -101,7 +103,7 @@ export class FileController {
 
     const result = await this.fileService.generateUploadSignedUrl(registerFile);
 
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -113,7 +115,7 @@ export class FileController {
     @Body() body: ConfirmFileUploadedDTO,
   ): Promise<ResponseSuccess> {
     const result = await this.fileService.confirmUpload(body.uuid);
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -125,7 +127,7 @@ export class FileController {
     @Body() body: ArchiveFileDTO,
   ): Promise<ResponseSuccess | ResponseError> {
     const result = await this.fileService.archiveDirectory(body.uuid);
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -143,7 +145,7 @@ export class FileController {
       request['user'].isAdmin,
     );
 
-    return RestResponse.success(response);
+    return GaRestResponse.success(response);
   }
 
   /**
@@ -165,7 +167,7 @@ export class FileController {
       uuid: body.uuid,
       plugin: variants,
     };
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 
   /**
@@ -189,6 +191,6 @@ export class FileController {
       data.message.variantId,
       updateData,
     );
-    return RestResponse.success(result);
+    return GaRestResponse.success(result);
   }
 }

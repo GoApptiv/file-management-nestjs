@@ -25,6 +25,8 @@
     "migration:run": "npm run build && npm run typeorm migration:run"
   },
   "dependencies": {
+    "@goapptiv/exception-handler-nestjs": "^1.0.1",
+    "@goapptiv/rest-response-nestjs": "^1.0.2",
     "@google-cloud/iam-credentials": "^2.0.1",
     "@google-cloud/pubsub": "^3.2.0",
     "@google-cloud/storage": "^6.6.0",

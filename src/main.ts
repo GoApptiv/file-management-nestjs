@@ -1,3 +1,13 @@
+import {
+  AllExceptionsFilter,
+  BadRequestExceptionFilter,
+  ConflictExceptionsFilter,
+  ForbiddenExceptionFilter,
+  InternalServerErrorExceptionsFilter,
+  NotFoundExceptionFilter,
+  UnauthorizedExceptionFilter,
+} from '@goapptiv/exception-handler-nestjs';
+import { GaRestResponse } from '@goapptiv/rest-response-nestjs';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
@@ -10,8 +20,6 @@ import * as winston from 'winston';
 import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
-import { BadRequestExceptionFilter } from './shared/filters/bad-request-exceptions.filter';
-import { RestResponse } from './shared/services/rest-response.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -51,14 +59,22 @@ async function bootstrap() {
     new ValidationPipe({
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         return new BadRequestException(
-          RestResponse.transformValidationError(validationErrors),
+          GaRestResponse.transformValidationError(validationErrors),
         );
       },
     }),
   );
 
-  // custom bad request filter to modify to generalise response format
-  app.useGlobalFilters(new BadRequestExceptionFilter());
+  // add exception filters
+  app.useGlobalFilters(
+    new AllExceptionsFilter(),
+    new UnauthorizedExceptionFilter(),
+    new ForbiddenExceptionFilter(),
+    new BadRequestExceptionFilter(),
+    new NotFoundExceptionFilter(),
+    new ConflictExceptionsFilter(),
+    new InternalServerErrorExceptionsFilter(),
+  );
 
   app.use(helmet());
 
