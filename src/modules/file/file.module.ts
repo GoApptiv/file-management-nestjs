@@ -4,9 +4,9 @@ import { AppConfigService } from 'src/config/app-config.service';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
 import { BucketConfigRepository } from '../auth/repositories/bucket-config.repository';
 import { ProjectRepository } from '../auth/repositories/project.repository';
-import { PluginRepository } from '../plugin/repositories/plugin.repository';
 import { FileController as FileControllerV1 } from './controllers/v1/file.controller';
 import { FileController as FileControllerV2 } from './controllers/v2/file.controller';
+import { PluginController as PluginControllerV2 } from './controllers/v2/plugin.controller';
 import { LogBulkFileAccessedListener } from './listeners/log-bulk-file-accessed.listener';
 import { LogFileAccessedListener } from './listeners/log-file-accessed.listener';
 import { AchiveFileListener } from './listeners/archive-file.listener';
@@ -25,7 +25,9 @@ import { Project } from '../auth/entities/project.entity';
 import { AccessLog } from './entities/access-log.entity';
 import { FileVariantLog } from './entities/file-variant-log.entity';
 import { FileVariant } from './entities/file-variant.entity';
-import { Plugin } from '../plugin/entities/plugin.entity';
+import { Plugin } from './entities/plugin.entity';
+import { PluginRepository } from './repositories/plugin.repository';
+import { PluginService } from './services/plugin.service';
 
 @Module({
   imports: [
@@ -41,9 +43,10 @@ import { Plugin } from '../plugin/entities/plugin.entity';
       Plugin,
     ]),
   ],
-  controllers: [FileControllerV1, FileControllerV2],
+  controllers: [FileControllerV1, FileControllerV2, PluginControllerV2],
   providers: [
     FileService,
+    PluginService,
     {
       provide: CloudPubSubService,
       useFactory: (configService: AppConfigService) => {

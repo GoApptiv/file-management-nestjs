@@ -9,7 +9,7 @@ export class ProjectRepository extends Repository<Project> {
   }
 
   /**
-   * Finds entity which matches the id
+   * finds entity which matches the id
    */
   findById(
     id: number,
@@ -19,7 +19,7 @@ export class ProjectRepository extends Repository<Project> {
   }
 
   /**
-   * Finds entity which matches the code
+   * finds entity which matches the code
    */
   findByCode(
     code: string,

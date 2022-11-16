@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 
-export class InvalidPluginCodeException extends BadRequestException {
-  constructor() {
+export class InvalidPluginException extends BadRequestException {
+  constructor(message: string) {
     super({
-      pluginCode: 'Plugin code is invalid',
+      plugin: message,
     });
   }
 }

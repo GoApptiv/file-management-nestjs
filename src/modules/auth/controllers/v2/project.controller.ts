@@ -5,7 +5,7 @@ import {
 } from '@goapptiv/rest-response-nestjs';
 import { Body, Post, Req, UseGuards, Request } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
-import { RegisterPluginDTO } from 'src/modules/plugin/dto/register-plugin.dto';
+import { RegisterPluginDTO } from 'src/modules/file/dto/register-plugin.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ProjectService } from '../../services/project.service';
 

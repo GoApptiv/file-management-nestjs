@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { StoreProjectPluginDAO } from 'src/modules/plugin/dao/project-plugin.dao';
-import { ProjectPluginRegisteredEvent } from 'src/modules/plugin/events/project-plugin-registered.event';
-import { InvalidPluginException } from 'src/modules/plugin/exceptions/invalid-plugin.exception';
-import { PluginRepository } from 'src/modules/plugin/repositories/plugin.repository';
-import { ProjectPluginRepository } from 'src/modules/plugin/repositories/project-plugin.repository';
+import { StoreProjectPluginDAO } from 'src/modules/file/dao/project-plugin.dao';
+import { ProjectPluginRegisteredEvent } from 'src/modules/file/events/project-plugin-registered.event';
+import { InvalidPluginException } from 'src/modules/file/exceptions/invalid-plugin.exception';
+import { PluginRepository } from 'src/modules/file/repositories/plugin.repository';
+import { ProjectPluginRepository } from 'src/modules/file/repositories/project-plugin.repository';
 import { Status } from 'src/shared/constants/status.enum';
 import { ProjectRepository } from '../repositories/project.repository';
 
@@ -51,7 +51,7 @@ export class ProjectService {
       throw new InvalidPluginException('Plugin already registered');
     }
 
-    if (webhookUrl.includes('https') === false) {
+    if (!webhookUrl.includes('https')) {
       this.logger.error(`WEBHOOK URL MUST CONTAIN HTTPS`);
       throw new InvalidPluginException('Webhook URL must be HTTPS');
     }

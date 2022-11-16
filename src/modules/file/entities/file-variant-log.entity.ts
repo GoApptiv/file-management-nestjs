@@ -1,8 +1,8 @@
-import { Plugin } from 'src/modules/plugin/entities/plugin.entity';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { FileVariant } from './file-variant.entity';
+import { Plugin } from './plugin.entity';
 
 @Entity('file_variant_logs')
 export class FileVariantLog extends AbstractEntity {

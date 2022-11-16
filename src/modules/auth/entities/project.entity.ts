@@ -1,4 +1,4 @@
-import { Plugin } from 'src/modules/plugin/entities/plugin.entity';
+import { Plugin } from 'src/modules/file/entities/plugin.entity';
 import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Column, Entity, JoinTable, OneToMany } from 'typeorm';
 

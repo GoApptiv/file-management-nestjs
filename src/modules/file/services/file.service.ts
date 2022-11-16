@@ -25,7 +25,6 @@ import { InvalidTemplateException } from '../exceptions/invalid-template.excepti
 import { BulkReadSignedUrlResult } from '../results/bulk-read-signed-url.result';
 import { CreateFileVariantBO } from '../bo/create-file-variant.bo';
 import { StoreFileVariantDAO } from '../dao/file-variant.dao';
-import { PluginRepository } from 'src/modules/plugin/repositories/plugin.repository';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import { FileVariantRepository } from '../repositories/file-variant.repository';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
@@ -37,10 +36,11 @@ import { CloudIAMService } from 'src/shared/services/cloud-iam.service';
 import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
 import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
-import { InvalidPluginCodeException } from '../exceptions/invalid-plugin.exception';
 import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FileVariantReadResult } from '../results/file-variant-read.result';
+import { PluginRepository } from '../repositories/plugin.repository';
+import { InvalidPluginException } from '../exceptions/invalid-plugin.exception';
 
 @Injectable()
 export class FileService {
@@ -395,7 +395,7 @@ export class FileService {
       const pluginData = await this.pluginRepository.findByCode(plugin.code);
 
       if (!pluginData) {
-        throw new InvalidPluginCodeException();
+        throw new InvalidPluginException('Plugin does not exist');
       }
 
       // check if the file variant already exists
