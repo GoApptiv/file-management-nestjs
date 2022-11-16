@@ -39,7 +39,7 @@ npm run migration:run
 Run the following command to create new migrations.
 
 ```cmd
-npm run migration:generate MigrationName
+npm run migration:generate --name=MigrationName
 ```
 
 ## Usage

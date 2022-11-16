@@ -1,17 +1,20 @@
-import { ConnectionOptions } from 'typeorm';
+import 'dotenv/config';
+import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-const config: ConnectionOptions = {
+const { DB_USERNAME, DB_PASSWORD, DB_DATABASE, DB_HOST, DB_PORT } = process.env;
+
+const config = new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  host: DB_HOST,
+  port: Number(DB_PORT),
+  username: DB_USERNAME,
+  password: DB_PASSWORD,
+  database: DB_DATABASE,
   synchronize: false,
   entities: ['dist/src/modules/**/entities/*.entity{.ts,.js}'],
   migrations: ['dist/src/database/migrations/*{.ts,.js}'],
   namingStrategy: new SnakeNamingStrategy(),
-};
+});
 
-export = config;
+export default config;
