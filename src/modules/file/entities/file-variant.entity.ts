@@ -1,13 +1,24 @@
-import { Project } from 'src/modules/auth/entities/project.entity';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { File } from './file.entity';
 import { Plugin } from './plugin.entity';
 
 @Entity('file_variants')
-export class FileVariant extends AbstractEntity {
+export class FileVariant {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
+  @Index()
   fileId: number;
 
   @ManyToOne(() => File, (file) => file.id)
@@ -37,4 +48,10 @@ export class FileVariant extends AbstractEntity {
     default: FileVariantStatus.REQUESTED,
   })
   status: FileVariantStatus;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

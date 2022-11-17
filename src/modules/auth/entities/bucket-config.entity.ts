@@ -1,9 +1,17 @@
 import { Exclude } from 'class-transformer';
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
-import { Column, Entity } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('bucket_configs')
-export class BucketConfig extends AbstractEntity {
+export class BucketConfig {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
   name: string;
 
@@ -13,4 +21,10 @@ export class BucketConfig extends AbstractEntity {
   @Exclude()
   @Column({ type: 'longtext' })
   key: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

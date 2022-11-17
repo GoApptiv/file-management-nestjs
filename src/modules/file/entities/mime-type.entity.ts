@@ -1,9 +1,18 @@
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
-import { Column, Entity, ManyToMany } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Template } from './template.entity';
 
 @Entity('mime_types')
-export class MimeType extends AbstractEntity {
+export class MimeType {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
   name: string;
 
@@ -15,4 +24,10 @@ export class MimeType extends AbstractEntity {
 
   @ManyToMany(() => Template, (template) => template.mimeTypes)
   templates: Template[];
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

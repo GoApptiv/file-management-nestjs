@@ -1,14 +1,24 @@
 import { FileStatus } from 'src/shared/constants/file-status.enum';
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Project } from 'src/modules/auth/entities/project.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { MimeType } from './mime-type.entity';
 import { Template } from './template.entity';
 
 @Entity('files')
-export class File extends AbstractEntity {
+export class File {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({ unique: true })
-  @Index()
   uuid: string;
 
   @Column()
@@ -22,6 +32,7 @@ export class File extends AbstractEntity {
   template: Template;
 
   @Column({ type: 'enum', enum: FileStatus, default: FileStatus.REQUESTED })
+  @Index()
   status: FileStatus;
 
   @Column()
@@ -31,6 +42,7 @@ export class File extends AbstractEntity {
   isUploaded: boolean;
 
   @Column()
+  @Index()
   isArchived: boolean;
 
   @Column({ unsigned: true })
@@ -44,6 +56,7 @@ export class File extends AbstractEntity {
   mimeType: MimeType;
 
   @Column()
+  @Index()
   projectId: number;
 
   @ManyToOne(() => Project, (project) => project.id)
@@ -59,4 +72,10 @@ export class File extends AbstractEntity {
 
   @Column({ nullable: true })
   archivalDate: Date;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

@@ -1,11 +1,21 @@
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { FileVariant } from './file-variant.entity';
 import { Plugin } from './plugin.entity';
 
 @Entity('file_variant_logs')
-export class FileVariantLog extends AbstractEntity {
+export class FileVariantLog {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
   variantId: number;
 
@@ -29,4 +39,10 @@ export class FileVariantLog extends AbstractEntity {
 
   @Column({ nullable: true })
   messageId: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

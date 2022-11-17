@@ -1,18 +1,23 @@
-import { AbstractEntity } from 'src/shared/entities/abstract.entity';
 import { Project } from 'src/modules/auth/entities/project.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { MimeType } from './mime-type.entity';
 import { BucketConfig } from 'src/modules/auth/entities/bucket-config.entity';
 
 @Entity('templates')
-export class Template extends AbstractEntity {
+export class Template {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column()
   name: string;
 
@@ -51,4 +56,10 @@ export class Template extends AbstractEntity {
   @ManyToOne(() => BucketConfig, (bucketConfig) => bucketConfig.id)
   @JoinColumn({ name: 'bucket_config_id' })
   bucketConfig: BucketConfig;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }
