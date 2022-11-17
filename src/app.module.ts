@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { createWriteStream } from 'pino-stackdriver';
 import pino from 'pino';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule } from '@nestjs/config';
@@ -27,33 +28,41 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     LoggerModule.forRootAsync({
       imports: [AppConfigModule],
-      useFactory: (configService: AppConfigService) => ({
-        pinoHttp: {
-          stream: pino.destination({
-            dest: `logs/${new Date().getFullYear()}/${
-              new Date().getMonth() + 1
-            }/${new Date().getFullYear()}-${
-              new Date().getMonth() + 1
-            }-${new Date().getDate()}.log`,
-            minLength: 4096,
-            sync: false,
-            mkdir: true,
-          }),
-          redact: ['req.headers.authorization'],
-          genReqId: () => uuidv4(),
-          transport: !configService.isProduction
-            ? {
-                target: 'pino-pretty',
-                options: {
-                  singleLine: true,
-                  translateTime: 'yyyy-MM-dd HH:mm:ss',
-                  messageFormat: '{req.id} [{context}] {msg}',
-                  ignore: 'pid,hostname',
-                },
-              }
-            : undefined,
-        },
-      }),
+      useFactory: (configService: AppConfigService) => {
+        const logName = `${configService.gcpCredentials.logName}-${configService.appEnvironment}`;
+
+        const writeStream = createWriteStream({
+          credentials: {
+            client_email: configService.gcpCredentials.logging.email,
+            private_key: configService.gcpCredentials.logging.privateKey,
+          },
+          projectId: configService.gcpCredentials.projectId,
+          logName: logName,
+          resource: {
+            type: 'global',
+          },
+        });
+
+        return {
+          pinoHttp: {
+            name: logName,
+            stream: writeStream,
+            redact: ['req.headers.authorization'],
+            genReqId: () => uuidv4(),
+            transport: !configService.isProduction
+              ? {
+                  target: 'pino-pretty',
+                  options: {
+                    singleLine: true,
+                    translateTime: 'yyyy-MM-dd HH:mm:ss',
+                    messageFormat: '{req.id} [{context}] {msg}',
+                    ignore: 'pid,hostname',
+                  },
+                }
+              : undefined,
+          },
+        };
+      },
       inject: [AppConfigService],
     }),
     EventEmitterModule.forRoot(),

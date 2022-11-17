@@ -1,9 +1,11 @@
-interface credentials {
+interface Credentials {
   email: string;
   privateKey: string;
 }
 
 export interface GcpCredentialsOptions {
   projectId: string;
-  pubSub: credentials;
+  logName: string;
+  pubSub: Credentials;
+  logging: Credentials;
 }
