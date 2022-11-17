@@ -54,7 +54,7 @@ export class RegisterPluginStatusSubscriberListener {
         );
       }
     } catch (error) {
-      this.logger.log(`ERROR IN REGISTERING SUBSCRIBER: ${error}`);
+      this.logger.warn(`ERROR IN REGISTERING SUBSCRIBER: ${error}`);
     }
   }
 }

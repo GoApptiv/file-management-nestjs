@@ -13,7 +13,7 @@ export class AchiveFileListener {
 
   @OnEvent('file.archive')
   async handleFileArchiveEvent(event: FileArchiveEvent) {
-    this.logger.log(`ARCHIVE DIRECTORY STARTED FOR: ${event.id}`);
+    this.logger.log(`archive file with id: ${event.id} started`);
 
     try {
       const file = await this.fileRepository.findOne({
@@ -36,9 +36,9 @@ export class AchiveFileListener {
 
       this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
 
-      this.logger.log(`ARCHIVE DIRECTORY COMPLETED FOR: ${event.id}`);
+      this.logger.log(`archive file with id: ${event.id} completed`);
     } catch (error) {
-      this.logger.error(`ARCHIVE DIRECTORY FAILED FOR: ${event.id}`);
+      this.logger.warn(`ARCHIVE DIRECTORY FAILED FOR: ${event.id}`);
     }
   }
 }

@@ -19,7 +19,7 @@ export class LogFileAccessedListener {
       };
       this.accessLogRepository.store(log);
     } catch (error) {
-      this.logger.error(`LOGGING FILE ACCESS FAILED FOR: ${event.fileId}`);
+      this.logger.warn(`LOG FILE ACCESSED FAILED FOR: ${event.fileId}`);
     }
   }
 }

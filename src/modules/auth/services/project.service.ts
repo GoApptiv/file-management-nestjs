@@ -1,5 +1,10 @@
+import {
+  GaBadRequestException,
+  GaConflictException,
+} from '@goapptiv/exception-handler-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PluginErrorCode } from 'src/modules/file/constants/errors.enum';
 import { StoreProjectPluginDAO } from 'src/modules/file/dao/project-plugin.dao';
 import { ProjectPluginRegisteredEvent } from 'src/modules/file/events/project-plugin-registered.event';
 import { InvalidPluginException } from 'src/modules/file/exceptions/invalid-plugin.exception';
@@ -28,14 +33,13 @@ export class ProjectService {
     projectId: number,
   ): Promise<boolean> {
     this.logger.log(
-      `REGISTER PLUGIN FOR PROJECT ${projectId} WITH PLUGIN CODE ${pluginCode}`,
+      `register plugin for project ${projectId} with plugin code ${pluginCode}`,
     );
 
     const plugin = await this.pluginRepository.findByCode(pluginCode);
 
     if (!plugin) {
-      this.logger.error(`PLUGIN WITH CODE ${pluginCode} NOT FOUND`);
-      throw new InvalidPluginException('Plugin does not exist');
+      throw new InvalidPluginException(pluginCode);
     }
 
     const project = await this.projectRepository.findById(projectId);
@@ -47,13 +51,27 @@ export class ProjectService {
       );
 
     if (projectPlugins) {
-      this.logger.error(`PLUGIN WITH CODE ${pluginCode} ALREADY REGISTERED`);
-      throw new InvalidPluginException('Plugin already registered');
+      throw new GaConflictException([
+        {
+          type: PluginErrorCode.E409_PLUGIN_ALREADY_REGISTERED,
+          message: `plugin with code ${pluginCode} already registered`,
+          context: {
+            pluginCode,
+          },
+        },
+      ]);
     }
 
     if (!webhookUrl.includes('https')) {
-      this.logger.error(`WEBHOOK URL MUST CONTAIN HTTPS`);
-      throw new InvalidPluginException('Webhook URL must be HTTPS');
+      throw new GaBadRequestException([
+        {
+          type: PluginErrorCode.E400_PLUGIN_INVALID_WEBHOOK_URL,
+          message: `webhook url ${webhookUrl} is invalid, it must be https`,
+          context: {
+            webhookUrl,
+          },
+        },
+      ]);
     }
 
     // Register the plugin
@@ -84,7 +102,7 @@ export class ProjectService {
     this.eventEmitter.emit('project-plugin.registered', eventData);
 
     this.logger.log(
-      `PLUGIN WITH CODE ${pluginCode} REGISTERED FOR PROJECT ${projectId}`,
+      `plugin with code ${pluginCode} registered for project: ${projectId}`,
     );
 
     return true;
