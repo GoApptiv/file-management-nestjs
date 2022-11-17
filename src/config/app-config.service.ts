@@ -54,6 +54,10 @@ export class AppConfigService {
     return this.getString('NODE_ENV', 'development');
   }
 
+  get appEnvironment(): string {
+    return this.getString('APP_ENVIRONMENT');
+  }
+
   get appConfig() {
     return {
       name: this.getString('APP_NAME'),

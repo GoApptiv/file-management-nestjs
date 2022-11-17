@@ -12,11 +12,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ValidationError } from 'class-validator';
 import helmet from 'helmet';
-import {
-  WinstonModule,
-  utilities as nestWinstonModuleUtilities,
-} from 'nest-winston';
-import * as winston from 'winston';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
@@ -24,29 +20,10 @@ import { AppConfigModule } from './config/config.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: WinstonModule.createLogger({
-      transports: [
-        new winston.transports.File({
-          dirname: `logs/${new Date().getFullYear()}/${
-            new Date().getMonth() + 1
-          }`,
-          filename: `${new Date().getFullYear()}-${
-            new Date().getMonth() + 1
-          }-${new Date().getDate()}.log`,
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            nestWinstonModuleUtilities.format.nestLike(),
-          ),
-        }),
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            nestWinstonModuleUtilities.format.nestLike(),
-          ),
-        }),
-      ],
-    }),
   });
+
+  // configure logger
+  app.useLogger(app.get(Logger));
 
   // add global prefix in uri
   app.setGlobalPrefix('api');
