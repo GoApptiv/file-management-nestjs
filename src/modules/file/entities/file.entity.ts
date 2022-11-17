@@ -63,12 +63,13 @@ export class File {
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
-  // @Column()
-  // createdBy: number;
+  @Column()
+  @Index()
+  createdBy: number;
 
-  // @ManyToOne(() => Project, (project) => project.id)
-  // @JoinColumn({ name: 'created_by' })
-  // creator: Project;
+  @ManyToOne(() => Project, (project) => project.id)
+  @JoinColumn({ name: 'created_by' })
+  creator: Project;
 
   @Column({ nullable: true })
   archivalDate: Date;

@@ -11,6 +11,7 @@ interface File {
   templateId: number;
   mimeTypeId: number;
   projectId: number;
+  createdBy: number;
   archivalDate: Date;
 }
 

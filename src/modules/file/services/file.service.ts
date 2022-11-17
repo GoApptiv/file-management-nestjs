@@ -67,8 +67,9 @@ export class FileService {
       `GENERATE SIGNED URL: ${data.projectId} : ${data.file.name}`,
     );
 
-    const template = await this.templateRepository.findByCode(
+    const template = await this.templateRepository.findByCodeAndProjectId(
       data.templateCode,
+      data.projectId,
       ['bucketConfig'],
     );
 
@@ -626,6 +627,7 @@ export class FileService {
       storagePath: storagePath,
       referenceNumber: data.referenceNumber,
       projectId: data.projectId,
+      createdBy: data.createdBy,
       mimeTypeId: mimeType.id,
       templateId: templateId,
       archivalDate: archivalDate,

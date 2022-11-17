@@ -3,6 +3,7 @@ import {
   IsInt,
   IsMimeType,
   IsNotEmptyObject,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -27,4 +28,8 @@ export class RegisterFileDTO {
   @ValidateNested()
   @Type(() => FileDTO)
   file: FileDTO;
+
+  @IsInt()
+  @IsOptional()
+  projectId: number;
 }

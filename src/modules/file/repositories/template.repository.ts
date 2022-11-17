@@ -9,12 +9,26 @@ export class TemplateRepository extends Repository<Template> {
   }
 
   /**
-   * Finds entity which matches the type
+   * finds entity which matches the code
    */
   findByCode(
     code: string,
     relations?: (keyof Template)[] | string[],
   ): Promise<Template> {
     return this.findOne({ where: { code }, relations: relations });
+  }
+
+  /**
+   * finds entity which matches the code and project_id
+   */
+  findByCodeAndProjectId(
+    code: string,
+    projectId: number,
+    relations?: (keyof Template)[] | string[],
+  ): Promise<Template> {
+    return this.findOne({
+      where: { code, projectId },
+      relations: relations,
+    });
   }
 }

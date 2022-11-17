@@ -96,9 +96,16 @@ export class FileController {
     @Body() body: RegisterFileDTO,
     @Req() request: Request,
   ): Promise<ResponseSuccess | ResponseError> {
+    const projectId = request['user'].isAdmin
+      ? body.projectId
+        ? body.projectId
+        : request['user'].projectId
+      : request['user'].projectId;
+
     const registerFile: RegisterFileBO = {
       ...body,
-      projectId: request['user'].projectId,
+      projectId,
+      createdBy: request['user'].projectId,
     };
 
     const result = await this.fileService.generateUploadSignedUrl(registerFile);
