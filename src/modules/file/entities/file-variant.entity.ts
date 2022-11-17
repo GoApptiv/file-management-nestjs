@@ -24,12 +24,12 @@ export class FileVariant extends AbstractEntity {
   @Column({ nullable: true })
   storagePath: string;
 
-  @Column()
-  createdBy: number;
+  // @Column()
+  // createdBy: number;
 
-  @ManyToOne(() => Project, (project) => project.id)
-  @JoinColumn({ name: 'created_by' })
-  creator: Project;
+  // @ManyToOne(() => Project, (project) => project.id)
+  // @JoinColumn({ name: 'created_by' })
+  // creator: Project;
 
   @Column({
     type: 'enum',

@@ -1,5 +1,5 @@
 import { CreateSubscriptionOptions } from '@google-cloud/pubsub';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Status } from 'src/shared/constants/status.enum';
 import { CloudPubSubService } from 'src/shared/services/cloud-pubsub.service';
@@ -9,6 +9,10 @@ import { ProjectPluginRepository } from '../repositories/project-plugin.reposito
 
 @Injectable()
 export class RegisterPluginStatusSubscriberListener {
+  private readonly logger = new Logger(
+    RegisterPluginStatusSubscriberListener.name,
+  );
+
   constructor(
     private readonly projectPluginRepository: ProjectPluginRepository,
     private readonly pluginRepository: PluginRepository,
@@ -19,34 +23,38 @@ export class RegisterPluginStatusSubscriberListener {
   async handleProjectPluginRegisteredEvent(
     event: ProjectPluginRegisteredEvent,
   ) {
-    const plugin = await this.pluginRepository.findById(event.pluginId);
+    try {
+      const plugin = await this.pluginRepository.findById(event.pluginId);
 
-    const projectPlugin =
-      await this.projectPluginRepository.findByProjectIdAndPluginId(
-        event.projectId,
-        event.pluginId,
+      const projectPlugin =
+        await this.projectPluginRepository.findByProjectIdAndPluginId(
+          event.projectId,
+          event.pluginId,
+        );
+
+      const subscriberOption: CreateSubscriptionOptions = {
+        ackDeadlineSeconds: 60,
+        filter: `attributes.projectId = "${event.projectId}"`,
+        pushConfig: {
+          pushEndpoint: projectPlugin.webhookUrl,
+        },
+      };
+
+      const subscriber = await this.cloudPubSubService.createPushSubscription(
+        plugin.cloudFunctionResponseTopic,
+        projectPlugin.pubsubStatusSubscriber,
+        subscriberOption,
       );
 
-    const subscriberOption: CreateSubscriptionOptions = {
-      ackDeadlineSeconds: 60,
-      filter: `attributes.projectId = "${event.projectId}"`,
-      pushConfig: {
-        pushEndpoint: projectPlugin.webhookUrl,
-      },
-    };
-
-    const subscriber = await this.cloudPubSubService.createPushSubscription(
-      plugin.cloudFunctionResponseTopic,
-      projectPlugin.pubsubStatusSubscriber,
-      subscriberOption,
-    );
-
-    if (subscriber) {
-      await this.projectPluginRepository.updateStatusByProjectIdAndPluginId(
-        Status.ACTIVE,
-        event.projectId,
-        event.pluginId,
-      );
+      if (subscriber) {
+        await this.projectPluginRepository.updateStatusByProjectIdAndPluginId(
+          Status.ACTIVE,
+          event.projectId,
+          event.pluginId,
+        );
+      }
+    } catch (error) {
+      this.logger.log(`ERROR IN REGISTERING SUBSCRIBER: ${error}`);
     }
   }
 }

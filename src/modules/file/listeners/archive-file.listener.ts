@@ -15,26 +15,30 @@ export class AchiveFileListener {
   async handleFileArchiveEvent(event: FileArchiveEvent) {
     this.logger.log(`ARCHIVE DIRECTORY STARTED FOR: ${event.id}`);
 
-    const file = await this.fileRepository.findOne({
-      where: { id: event.id },
-      relations: ['template', 'template.bucketConfig'],
-    });
+    try {
+      const file = await this.fileRepository.findOne({
+        where: { id: event.id },
+        relations: ['template', 'template.bucketConfig'],
+      });
 
-    const storage = new CloudStorageService(
-      file.template.bucketConfig.email,
-      UtilsService.base64decodeKey(file.template.bucketConfig.key),
-      file.template.bucketConfig.name,
-    );
+      const storage = new CloudStorageService(
+        file.template.bucketConfig.email,
+        UtilsService.base64decodeKey(file.template.bucketConfig.key),
+        file.template.bucketConfig.name,
+      );
 
-    if (event.isDirectory) {
-      const directory = file.storagePath.split('/').slice(0, -1).join('/');
-      await storage.setDirectoryStorageClassToArchive(directory);
-    } else {
-      await storage.setStorageClassToArchive(file.storagePath);
+      if (event.isDirectory) {
+        const directory = file.storagePath.split('/').slice(0, -1).join('/');
+        await storage.setDirectoryStorageClassToArchive(directory);
+      } else {
+        await storage.setStorageClassToArchive(file.storagePath);
+      }
+
+      this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
+
+      this.logger.log(`ARCHIVE DIRECTORY COMPLETED FOR: ${event.id}`);
+    } catch (error) {
+      this.logger.error(`ARCHIVE DIRECTORY FAILED FOR: ${event.id}`);
     }
-
-    this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
-
-    this.logger.log(`ARCHIVE DIRECTORY COMPLETED FOR: ${event.id}`);
   }
 }

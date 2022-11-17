@@ -606,7 +606,7 @@ export class FileService {
   }
 
   /**
-   * Store file request in the database
+   * store file request in the database
    */
   private async storeFileUploadRequest(
     data: RegisterFileBO,
