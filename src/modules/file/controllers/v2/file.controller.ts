@@ -168,6 +168,7 @@ export class FileController {
     const variants = await this.fileService.createFileVariants(
       createVariant,
       request['user'].projectId,
+      request['user'].isAdmin,
     );
 
     const result = {

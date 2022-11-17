@@ -5,6 +5,7 @@ export class FileVariant {
   pluginId: number;
   storagePath?: string;
   status: FileVariantStatus;
+  createdBy: number;
 }
 
 export type StoreFileVariantDAO = FileVariant;

@@ -64,7 +64,6 @@ export class File {
   project: Project;
 
   @Column()
-  @Index()
   createdBy: number;
 
   @ManyToOne(() => Project, (project) => project.id)

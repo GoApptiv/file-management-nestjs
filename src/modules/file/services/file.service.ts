@@ -401,20 +401,24 @@ export class FileService {
   async createFileVariants(
     data: CreateFileVariantBO,
     projectId: number,
+    isAdmin = false,
   ): Promise<FileVariantCreateResult[]> {
     this.logger.log(
       `create file variants called for file with uuid: ${data.uuid} requested by project: ${projectId}`,
     );
 
     const uuid = data.uuid;
-    const file = await this.fileRepository.findByUuidAndProjectId(
-      uuid,
-      projectId,
-      ['template', 'template.bucketConfig'],
-    );
+    const file = await this.fileRepository.findByUuid(uuid, [
+      'template',
+      'template.bucketConfig',
+    ]);
 
     // check if file exists
-    if (!file || file.isUploaded === false) {
+    if (
+      !file ||
+      file.isUploaded === false ||
+      (!isAdmin && file.projectId !== projectId)
+    ) {
       throw new InvalidFileException(uuid);
     }
 
@@ -450,7 +454,7 @@ export class FileService {
           };
 
           this.logger.warn(
-            `FILE VARIANT ALREADY EXISTS: ${uuid} for PLUGIN: ${plugin.code}`,
+            `FILE VARIANT ALREADY EXISTS: ${uuid} FOR PLUGIN: ${plugin.code}`,
           );
 
           fileVariants.push(response);
@@ -466,6 +470,7 @@ export class FileService {
           fileId: file.id,
           pluginId: pluginData.id,
           status: FileVariantStatus.REQUESTED,
+          createdBy: projectId,
         };
 
         const fileStoragePath = this.generateFileNamePathFromStoragePath(
@@ -497,6 +502,7 @@ export class FileService {
         const readSignedUrl = await this.generateReadSignedUrl(
           readSignedUrlData,
           projectId,
+          isAdmin,
         );
 
         // store data in file variant

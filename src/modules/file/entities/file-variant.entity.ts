@@ -1,3 +1,4 @@
+import { Project } from 'src/modules/auth/entities/project.entity';
 import { FileVariantStatus } from 'src/shared/constants/file-variant-status.enum';
 import {
   Column,
@@ -35,12 +36,12 @@ export class FileVariant {
   @Column({ nullable: true })
   storagePath: string;
 
-  // @Column()
-  // createdBy: number;
+  @Column()
+  createdBy: number;
 
-  // @ManyToOne(() => Project, (project) => project.id)
-  // @JoinColumn({ name: 'created_by' })
-  // creator: Project;
+  @ManyToOne(() => Project, (project) => project.id)
+  @JoinColumn({ name: 'created_by' })
+  creator: Project;
 
   @Column({
     type: 'enum',
