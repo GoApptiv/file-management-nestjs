@@ -101,4 +101,8 @@ export class AppConfigService {
       },
     };
   }
+
+  get slackExceptionNotifierWebhook(): string {
+    return this.getString('SLACK_EXCEPTION_NOTIFIER_WEBHOOK');
+  }
 }

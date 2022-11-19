@@ -69,9 +69,6 @@ export class FileService {
     data: RegisterFileBO,
   ): Promise<WriteSignedUrlResult> {
     this.logger.log(
-      `GENERATE SIGNED URL: ${data.projectId} : ${data.file.name}`,
-    );
-    this.logger.log(
       `generate signed url for file: ${data.file.name} with ref: ${data.referenceNumber} and created by: ${data.createdBy}`,
     );
 

@@ -10,6 +10,7 @@ import {
 import { GaRestResponse } from '@goapptiv/rest-response-nestjs';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ValidationError } from 'class-validator';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
@@ -42,9 +43,11 @@ async function bootstrap() {
     }),
   );
 
+  const eventEmitter = app.get(EventEmitter2);
+
   // add exception filters
   app.useGlobalFilters(
-    new AllExceptionsFilter(),
+    new AllExceptionsFilter(eventEmitter),
     new UnauthorizedExceptionFilter(),
     new ForbiddenExceptionFilter(),
     new BadRequestExceptionFilter(),
