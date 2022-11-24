@@ -35,6 +35,7 @@ async function bootstrap() {
   // transforms validation error to generalised format
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         return new BadRequestException(
           GaRestResponse.transformValidationError(validationErrors),
