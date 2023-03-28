@@ -1,6 +1,6 @@
 FROM node:16.13.0
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 ARG NPM_GITHUB_TOKEN
 
@@ -17,4 +17,5 @@ COPY . .
 RUN npx nest build
 
 EXPOSE 80
-CMD ["node", "start"]
+
+CMD ["npm", "run" , "start:prod"]
