@@ -60,6 +60,27 @@ pipeline {
                     sh 'ssh -o StrictHostKeyChecking=no -i "${SSH_PRIVATE_KEY}" "${SSH_USERNAME}"@"${VM_IP}" "sudo gcloud auth configure-docker ${GCR_REGISTRY} -q && cd apps && sudo docker compose pull && sudo docker compose down && sudo docker compose up -d"'
                 }
             }
+
+            post {
+                success {
+                    // send success email notification
+                    mail to: 'sagar.vaghela@goapptiv.com',
+                         subject: "Pipeline Successful: ${env.JOB_NAME}",
+                         body: "Your Jenkins pipeline ${env.JOB_NAME} has completed successfully. Here are the details:\n\n" +
+                               "Build Number: ${env.BUILD_NUMBER}\n" +
+                               "Duration: ${currentBuild.durationString}\n" +
+                               "Status: SUCCESS"
+                }
+                failure {
+                    // send failure email notification
+                    mail to: 'sagar.vaghela@goapptiv.com',
+                         subject: "Pipeline Failed: ${env.JOB_NAME}",
+                         body: "Your Jenkins pipeline ${env.JOB_NAME} has failed. Please check the console output for details. Here are the details:\n\n" +
+                               "Build Number: ${env.BUILD_NUMBER}\n" +
+                               "Duration: ${currentBuild.durationString}\n" +
+                               "Status: FAILURE"
+                }
+            }
         }
 
         stage("Cleanup") {
