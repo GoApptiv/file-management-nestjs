@@ -36,11 +36,8 @@ pipeline {
 
         stage("Push Docker Image") {
             steps {
-                withCredentials([file(credentialsId: 'goapptiv-gcr-sa-key', variable: 'GOAPPTIV_GCR_SA_KEY')]) {
-                    sh 'gcloud auth activate-service-account --key-file="${GOAPPTIV_GCR_SA_KEY}"'
-                    sh 'gcloud auth configure-docker ${GCR_REGISTRY} -q'
-                    sh 'docker push ${GCR_REGISTRY}/${GCR_PROJECT_ID}/${GCR_IMAGE_NAME}:latest'
-                }
+                sh 'gcloud auth configure-docker ${GCR_REGISTRY} -q'
+                sh 'docker push ${GCR_REGISTRY}/${GCR_PROJECT_ID}/${GCR_IMAGE_NAME}:latest'
             }
         }
 
