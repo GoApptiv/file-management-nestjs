@@ -28,6 +28,16 @@ pipeline {
             }
         }
 
+        stage("Activate Service Account") {
+            steps {
+                // Read the service account credential
+                withCredentials([file(credentialsId: 'proj-goapptiv-gcr-deployer-sa-key', variable: 'SERVICE_ACCOUNT')]) {
+                    // Activate the service account
+                    sh 'gcloud auth activate-service-account --key-file="${SERVICE_ACCOUNT}"'
+                }
+            }
+        }
+
         stage("Build Docker Image") {
             steps {
                 script {
