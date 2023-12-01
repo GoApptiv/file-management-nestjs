@@ -8,7 +8,7 @@ COPY package*.json ./
 
 COPY .npmrc .npmrc  
 
-RUN npm install
+RUN npm ci
 
 RUN rm -f .npmrc
 
