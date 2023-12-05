@@ -22,7 +22,7 @@ export class RegisterPluginStatusSubscriberListener {
   @OnEvent('project-plugin.registered')
   async handleProjectPluginRegisteredEvent(
     event: ProjectPluginRegisteredEvent,
-  ) {
+  ): Promise<void> {
     try {
       const plugin = await this.pluginRepository.findById(event.pluginId);
 

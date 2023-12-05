@@ -12,12 +12,12 @@ export class LogFileAccessedListener {
   constructor(private readonly accessLogRepository: AccessLogRepository) {}
 
   @OnEvent('file.accessed')
-  handleFileAccessedEvent(event: FileAccessedEvent) {
+  async handleFileAccessedEvent(event: FileAccessedEvent): Promise<void> {
     try {
       const log: StoreAccessLogDAO = {
         ...event,
       };
-      this.accessLogRepository.store(log);
+      await this.accessLogRepository.store(log);
     } catch (error) {
       this.logger.warn(`LOG FILE ACCESSED FAILED FOR: ${event.fileId}`);
     }

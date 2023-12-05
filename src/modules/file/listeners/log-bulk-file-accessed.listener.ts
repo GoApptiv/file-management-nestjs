@@ -11,7 +11,7 @@ export class LogBulkFileAccessedListener {
   constructor(private readonly accessLogRepository: AccessLogRepository) {}
 
   @OnEvent('bulk-file.accessed')
-  handleFileAccessedEvent(event: FileAccessedEvent[]) {
+  async handleFileAccessedEvent(event: FileAccessedEvent[]): Promise<void> {
     try {
       const logs: StoreAccessLogDAO[] = [];
       event.forEach((accessEvent) =>
@@ -20,7 +20,7 @@ export class LogBulkFileAccessedListener {
         }),
       );
 
-      this.accessLogRepository.bulkStore(logs);
+      await this.accessLogRepository.bulkStore(logs);
     } catch (error) {
       this.logger.error(`LOGGING FILE ACCESS FAILED FOR MULTIPLE FILES`);
     }

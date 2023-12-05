@@ -37,7 +37,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     ProjectService,
     {
       provide: CloudPubSubService,
-      useFactory: (configService: AppConfigService) => {
+      useFactory: (configService: AppConfigService): CloudPubSubService => {
         return new CloudPubSubService(
           configService.gcpCredentials.pubSub.email,
           configService.gcpCredentials.pubSub.privateKey,

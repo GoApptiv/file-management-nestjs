@@ -12,7 +12,9 @@ export class CloudPubSubService {
   constructor(email: string, privateKey: string, projectId: string) {
     this.client = new PubSub({
       credentials: {
+        // eslint-disable-next-line camelcase
         private_key: privateKey,
+        // eslint-disable-next-line camelcase
         client_email: email,
       },
       projectId,

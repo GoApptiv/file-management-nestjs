@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 
 export class UtilsService {
   /**
-   * generate hash from string
+   * Generate hash from string
    */
   static generateHash(text: string, algorithm: 'sha1' | 'sha256'): string {
     const hash = crypto.createHmac(algorithm, text).digest('hex');
@@ -10,7 +10,7 @@ export class UtilsService {
   }
 
   /**
-   * generate random string
+   * Generate random string
    */
   static generateRandomString(length: number): string {
     return Math.random()
@@ -20,14 +20,14 @@ export class UtilsService {
   }
 
   /**
-   * decode key value from database
+   * Decode key value from database
    */
   static base64decodeKey(encodedKey: string): string {
     return Buffer.from(encodedKey, 'base64').toString().replace(/\\n/gm, '\n');
   }
 
   /**
-   * extract project id from gcp email id
+   * Extract project id from gcp email id
    */
   static extractProjectIdFromGcpEmailId(email: string): string {
     return email.split('@')[1].replace('.iam.gserviceaccount.com', '');

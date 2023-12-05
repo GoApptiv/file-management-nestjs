@@ -16,7 +16,7 @@ export class PluginController {
   constructor(private readonly pluginService: PluginService) {}
 
   /**
-   * fetch plugins
+   * Fetch plugins
    */
   @Get()
   @UseGuards(JwtAuthGuard)

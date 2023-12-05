@@ -27,7 +27,7 @@ export class PluginRepository extends Repository<Plugin> {
   }
 
   /**
-   * finds entity which matches the id
+   * Finds entity which matches the id
    */
   findById(
     id: number,
@@ -37,7 +37,7 @@ export class PluginRepository extends Repository<Plugin> {
   }
 
   /**
-   * finds entity which matches the code
+   * Finds entity which matches the code
    */
   findByCode(
     code: string,

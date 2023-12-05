@@ -12,7 +12,7 @@ export class AchiveFileListener {
   constructor(private readonly fileRepository: FileRepository) {}
 
   @OnEvent('file.archive')
-  async handleFileArchiveEvent(event: FileArchiveEvent) {
+  async handleFileArchiveEvent(event: FileArchiveEvent): Promise<void> {
     this.logger.log(`archive file with id: ${event.id} started`);
 
     try {
@@ -34,7 +34,7 @@ export class AchiveFileListener {
         await storage.setStorageClassToArchive(file.storagePath);
       }
 
-      this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
+      await this.fileRepository.updateIsArchivedByUuid(file.uuid, true);
 
       this.logger.log(`archive file with id: ${event.id} completed`);
     } catch (error) {

@@ -74,7 +74,7 @@ export class FileRepository extends Repository<File> {
   }
 
   /**
-   * update the status and isUploaded by uuid
+   * Update the status and isUploaded by uuid
    */
   async updateStatusAndIsUploadedByUuid(
     uuid: string,
@@ -86,7 +86,7 @@ export class FileRepository extends Repository<File> {
   }
 
   /**
-   * update isArchived by uuid
+   * Update isArchived by uuid
    */
   async updateIsArchivedByUuid(
     uuid: string,

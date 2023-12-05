@@ -37,7 +37,7 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   /**
-   * generates a signed url for reading a file.
+   * Generates a signed url for reading a file.
    */
   @Get('uuid/:uuid')
   @UseGuards(JwtAuthGuard)
@@ -62,7 +62,7 @@ export class FileController {
   }
 
   /**
-   * generates a signed url for reading a file in bulk.
+   * Generates a signed url for reading a file in bulk.
    */
   @Post('bulk/uuid')
   @UseGuards(JwtAuthGuard)
@@ -88,7 +88,7 @@ export class FileController {
   }
 
   /**
-   * generates a signed url for writing a file.
+   * Generates a signed url for writing a file.
    */
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -114,7 +114,7 @@ export class FileController {
   }
 
   /**
-   * confirms that a file has been uploaded.
+   * Confirms that a file has been uploaded.
    */
   @Put('confirm')
   @UseGuards(JwtAuthGuard)
@@ -126,7 +126,7 @@ export class FileController {
   }
 
   /**
-   * archives a file.
+   * Archives a file.
    */
   @Put('archive')
   @UseGuards(JwtAuthGuard)
@@ -138,7 +138,7 @@ export class FileController {
   }
 
   /**
-   * generates a signed url for all the variants of the file.
+   * Generates a signed url for all the variants of the file.
    */
   @Get('variants/uuid/:uuid')
   @UseGuards(JwtAuthGuard)
@@ -156,7 +156,7 @@ export class FileController {
   }
 
   /**
-   * creates a file variant.
+   * Creates a file variant.
    */
   @Post('variants')
   @UseGuards(JwtAuthGuard)
@@ -179,7 +179,7 @@ export class FileController {
   }
 
   /**
-   * updates a file variant status from cloud function response.
+   * Updates a file variant status from cloud function response.
    */
   @Post('variants/cf-status-response')
   async updateFileVariantStatus(
@@ -195,10 +195,10 @@ export class FileController {
       messageId: body.message.messageId,
     };
 
-    const result = this.fileService.updateFileVariantByCfResponse(
+    const result = await this.fileService.updateFileVariantByCfResponse(
       data.message.variantId,
       updateData,
     );
-    return GaRestResponse.success(result);
+    return GaRestResponse.success(result.toString());
   }
 }

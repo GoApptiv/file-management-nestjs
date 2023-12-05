@@ -55,7 +55,7 @@ import { FileCronController } from './controllers/v1/file-cron.controller';
     PluginService,
     {
       provide: CloudPubSubService,
-      useFactory: (configService: AppConfigService) => {
+      useFactory: (configService: AppConfigService): CloudPubSubService => {
         return new CloudPubSubService(
           configService.gcpCredentials.pubSub.email,
           configService.gcpCredentials.pubSub.privateKey,

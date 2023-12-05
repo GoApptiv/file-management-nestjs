@@ -18,25 +18,27 @@ import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
 
-async function bootstrap() {
+async function bootstrap(): Promise<any> {
   const app = await NestFactory.create(AppModule, {
     cors: true,
   });
 
-  // configure logger
+  // Configure logger
   app.useLogger(app.get(Logger));
 
-  // add global prefix in uri
+  // Add global prefix in uri
   app.setGlobalPrefix('api');
 
-  // enable versioning example https://filestorage.com/v1/route
+  // Enable versioning example https://filestorage.com/v1/route
   app.enableVersioning();
 
-  // transforms validation error to generalised format
+  // Transforms validation error to generalised format
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      exceptionFactory: (validationErrors: ValidationError[] = []) => {
+      exceptionFactory: (
+        validationErrors: ValidationError[] = [],
+      ): BadRequestException => {
         return new BadRequestException(
           GaRestResponse.transformValidationError(validationErrors),
         );
@@ -46,7 +48,7 @@ async function bootstrap() {
 
   const eventEmitter = app.get(EventEmitter2);
 
-  // add exception filters
+  // Add exception filters
   app.useGlobalFilters(
     new AllExceptionsFilter(eventEmitter),
     new UnauthorizedExceptionFilter(),
@@ -68,4 +70,4 @@ async function bootstrap() {
 
   return app;
 }
-bootstrap();
+void bootstrap();

@@ -58,7 +58,14 @@ export class AppConfigService {
     return this.getString('APP_ENVIRONMENT');
   }
 
-  get appConfig() {
+  get appConfig(): {
+    name: string;
+    description: string;
+    maintainer: string;
+    url: string;
+    supportEmail: string;
+    port: string;
+  } {
     return {
       name: this.getString('APP_NAME'),
       description: this.getString('APP_DESCRIPTION'),

@@ -10,14 +10,14 @@ export class AccessLogRepository extends Repository<AccessLog> {
   }
 
   /**
-   * creates new record
+   * Creates new record
    */
   store(data: StoreAccessLogDAO): Promise<AccessLog> {
     return this.save(data);
   }
 
   async bulkStore(data: StoreAccessLogDAO[]): Promise<InsertResult> {
-    return this.createQueryBuilder()
+    return await this.createQueryBuilder()
       .insert()
       .into(AccessLog)
       .values(data)
