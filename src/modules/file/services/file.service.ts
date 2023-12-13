@@ -37,7 +37,6 @@ import { GCP_SCOPE } from 'src/shared/constants/gcp-scope';
 import { GCP_IAM_ACCESS_TOKEN_LIFETIME_IN_SECONDS } from 'src/shared/constants/constants';
 import { FileVariantCfStatus } from 'src/shared/constants/file-variant-cf-status.enum';
 import { UpdateFileVariantBO } from '../bo/update-file-variant.bo';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { FileVariantReadResult } from '../results/file-variant-read.result';
 import { PluginRepository } from '../repositories/plugin.repository';
 import { InvalidPluginException } from '../exceptions/invalid-plugin.exception';
@@ -792,10 +791,7 @@ export class FileService {
   /**
    * Fails the queued file variants
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  private async failQueuedFileVariantsBeforeMinutes(
-    minutes = Number(10),
-  ): Promise<void> {
+  async failQueuedFileVariants(minutes = Number(10)): Promise<boolean> {
     this.logger.log(`failing queued file variants before ${minutes} minutes`);
 
     const fileVariants =
@@ -825,13 +821,14 @@ export class FileService {
     }
 
     this.logger.log(`file variants failed: ${fileVariants.length}`);
+
+    return true;
   }
 
   /**
    * archive the file which passed the archival date
    */
-  @Cron(CronExpression.EVERY_DAY_AT_1AM)
-  private async archiveArchivalDatePassedFiles(): Promise<void> {
+  async archiveArchivalDatePassedFiles(): Promise<boolean> {
     this.logger.log(`archiving files with archival date passed`);
 
     let allFilesFetched = false;
@@ -858,5 +855,6 @@ export class FileService {
         allFilesFetched = true;
       }
     }
+    return true;
   }
 }
