@@ -28,7 +28,7 @@ import { FileVariant } from './entities/file-variant.entity';
 import { Plugin } from './entities/plugin.entity';
 import { PluginRepository } from './repositories/plugin.repository';
 import { PluginService } from './services/plugin.service';
-import { CronController } from './controllers/v1/file-cron.controller';
+import { FileCronController } from './controllers/v1/file-cron.controller';
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ import { CronController } from './controllers/v1/file-cron.controller';
     FileControllerV1,
     FileControllerV2,
     PluginControllerV2,
-    CronController,
+    FileCronController,
   ],
   providers: [
     FileService,
