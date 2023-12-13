@@ -19,6 +19,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     const project = await this.projectRepository.findByCode(payload.username);
+    if (!project) {
+      return {
+        projectCode: payload.username,
+        isAdmin: payload.isAdmin,
+      };
+    }
 
     return {
       projectCode: payload.username,

@@ -1,12 +1,11 @@
-import { Controller, Post } from '@nestjs/common';
-import { Role } from 'src/modules/auth/constants/role.enum';
-import { AuthGuard } from 'src/modules/auth/decorators/auth-guard.decorator';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import {
   GaRestResponse,
   ResponseError,
   ResponseSuccess,
 } from '@goapptiv/rest-response-nestjs';
 import { FileService } from '../../services/file.service';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @Controller({
   path: 'crons/files',
@@ -19,7 +18,7 @@ export class FileCronController {
    * Fails the queued file variants
    */
   @Post('fail-queued-file-variants')
-  @AuthGuard(Role.CRON_MANAGER)
+  @UseGuards(JwtAuthGuard)
   async failQueuedFileVariants(): Promise<ResponseSuccess | ResponseError> {
     const data = await this.fileService.failQueuedFileVariants();
     return GaRestResponse.success({
@@ -31,7 +30,7 @@ export class FileCronController {
    * Archive the file which passed the archival date
    */
   @Post('archive-archival-date-passed-files')
-  @AuthGuard(Role.CRON_MANAGER)
+  @UseGuards(JwtAuthGuard)
   async archiveArchivalDatePassedFiles(): Promise<
     ResponseSuccess | ResponseError
   > {
