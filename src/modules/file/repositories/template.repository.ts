@@ -9,7 +9,7 @@ export class TemplateRepository extends Repository<Template> {
   }
 
   /**
-   * finds entity which matches the code
+   * Finds entity which matches the code
    */
   findByCode(
     code: string,
@@ -19,7 +19,7 @@ export class TemplateRepository extends Repository<Template> {
   }
 
   /**
-   * finds entity which matches the code and project_id
+   * Finds entity which matches the code and project_id
    */
   findByCodeAndProjectId(
     code: string,

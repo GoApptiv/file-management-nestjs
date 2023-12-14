@@ -14,7 +14,9 @@ export class CloudIAMService {
   constructor(email: string, privateKey: string) {
     this.client = new IAMCredentialsClient({
       credentials: {
+        // eslint-disable-next-line camelcase
         client_email: email,
+        // eslint-disable-next-line camelcase
         private_key: privateKey,
       },
       projectId: UtilsService.extractProjectIdFromGcpEmailId(email),
@@ -22,7 +24,7 @@ export class CloudIAMService {
   }
 
   /**
-   * generates access token
+   * Generates access token
    */
   async generateAccessToken(
     serviceAccount: string,

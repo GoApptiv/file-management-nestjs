@@ -62,7 +62,7 @@ export class FileService {
   ) {}
 
   /**
-   * generate signed url
+   * Generate signed url
    */
   async generateUploadSignedUrl(
     data: RegisterFileBO,
@@ -104,7 +104,7 @@ export class FileService {
 
       const expiryTime = this.generateExpiryTime(template.linkExpiryTimeInS);
 
-      const storage = await this.getCloudStorageService(template.bucketConfig);
+      const storage = this.getCloudStorageService(template.bucketConfig);
 
       const signedUrl = await storage.generateUploadSignedUrl(
         storagePath,
@@ -127,13 +127,14 @@ export class FileService {
       return {
         uuid: store.uuid,
         url: signedUrl,
+        // eslint-disable-next-line camelcase
         reference_number: store.referenceNumber,
       };
     }
   }
 
   /**
-   * confirm upload
+   * Confirm upload
    */
   async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
     this.logger.log(`confirm upload for file with uuid: ${uuid}`);
@@ -154,7 +155,7 @@ export class FileService {
   }
 
   /**
-   * generate read signed url
+   * Generate read signed url
    */
   async generateReadSignedUrl(
     data: ReadFileBO,
@@ -180,9 +181,7 @@ export class FileService {
 
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
-    const storage = await this.getCloudStorageService(
-      file.template.bucketConfig,
-    );
+    const storage = this.getCloudStorageService(file.template.bucketConfig);
 
     const signedUrl = await storage.generateReadSignedUrl(
       file.storagePath,
@@ -208,7 +207,7 @@ export class FileService {
   }
 
   /**
-   * generates bulk read signed urls
+   * Generates bulk read signed urls
    */
   async bulkGenerateReadSignedUrl(
     data: BulkReadFileBO,
@@ -242,9 +241,7 @@ export class FileService {
           file.template.linkExpiryTimeInS,
         );
 
-        const storage = await this.getCloudStorageService(
-          file.template.bucketConfig,
-        );
+        const storage = this.getCloudStorageService(file.template.bucketConfig);
 
         const signedUrl = await storage.generateReadSignedUrl(
           file.storagePath,
@@ -330,7 +327,7 @@ export class FileService {
   }
 
   /**
-   * generate file variant read signed url
+   * Generate file variant read signed url
    */
   async generateFileVariantReadSignedUrl(
     uuid: string,
@@ -358,9 +355,7 @@ export class FileService {
 
     const expiryTime = this.generateExpiryTime(file.template.linkExpiryTimeInS);
 
-    const storage = await this.getCloudStorageService(
-      file.template.bucketConfig,
-    );
+    const storage = this.getCloudStorageService(file.template.bucketConfig);
 
     const fileVariants =
       await this.fileVariantRepository.fetchByFileIdAndStatus(
@@ -409,7 +404,7 @@ export class FileService {
       'template.bucketConfig',
     ]);
 
-    // check if file exists
+    // Check if file exists
     if (
       !file ||
       file.isUploaded === false ||
@@ -427,14 +422,14 @@ export class FileService {
         throw new InvalidPluginException(plugin.code);
       }
 
-      // check if the file variant already exists
+      // Check if the file variant already exists
       const fileVariantsInSystem =
         await this.fileVariantRepository.fetchByFileIdAndPluginId(
           file.id,
           pluginData.id,
         );
 
-      // if file variant already exists and not in error and delete state, append the result and skip
+      // If file variant already exists and not in error and delete state, append the result and skip
       let createVariant = true;
 
       fileVariantsInSystem.forEach((fileVariant) => {
@@ -474,7 +469,7 @@ export class FileService {
         );
 
         this.logger.log(`creating iam token for file variant: ${uuid}`);
-        const iamService = await this.getCloudIAMService(
+        const iamService = this.getCloudIAMService(
           file.template.bucketConfig.email,
           this.decodeBucketConfigPrivateKey(file.template.bucketConfig.key),
         );
@@ -501,7 +496,7 @@ export class FileService {
           isAdmin,
         );
 
-        // store data in file variant
+        // Store data in file variant
         const fileVariantData = await this.fileVariantRepository.store(
           fileVariant,
         );
@@ -544,7 +539,7 @@ export class FileService {
           pubsubMessage,
         );
 
-        // if pub/sub message is published successfully, update file variant status to queued
+        // If pub/sub message is published successfully, update file variant status to queued
         if (pubsubMessageId !== null) {
           this.logger.log(
             `pub/sub message published for file: ${uuid} and plugin: ${plugin.code} with id: ${pubsubMessageId}`,
@@ -571,7 +566,7 @@ export class FileService {
 
           fileVariants.push(response);
         } else {
-          // if pub/sub message is not published successfully, update file variant status to error
+          // If pub/sub message is not published successfully, update file variant status to error
           this.logger.warn(
             `PUB/SUB MESSAGE NOT PUBLISHED FOR FILE: ${uuid} AND PLUGIN: ${plugin.code}`,
           );
@@ -640,7 +635,7 @@ export class FileService {
   }
 
   /**
-   * store file request in the database
+   * Store file request in the database
    */
   private async storeFileUploadRequest(
     data: RegisterFileBO,
@@ -670,7 +665,7 @@ export class FileService {
   }
 
   /**
-   * validate file to be uploaded
+   * Validate file to be uploaded
 
    */
   private async isFileValidForTemplate(
@@ -718,7 +713,7 @@ export class FileService {
   }
 
   /**
-   * generate storage path for the file
+   * Generate storage path for the file
    */
   private generateStoragePath(
     baseStoragePath: string,
@@ -729,25 +724,25 @@ export class FileService {
   }
 
   /**
-   * generate signed url expiry time
+   * Generate signed url expiry time
    */
   private generateExpiryTime(expiryTime: number): moment.Moment {
     return moment().add(expiryTime, 'seconds');
   }
 
   /**
-   * generate hash id
+   * Generate hash id
    */
   private generateUuid(referenceNumber: string, projectId: number): string {
     return UtilsService.generateHash(`${referenceNumber}_${projectId}`, 'sha1');
   }
 
   /**
-   * initialize the storage for the bucket config
+   * Initialize the storage for the bucket config
    */
-  private async getCloudStorageService(
+  private getCloudStorageService(
     bucketConfig: BucketConfig,
-  ): Promise<CloudStorageService> {
+  ): CloudStorageService {
     return new CloudStorageService(
       bucketConfig.email,
       this.decodeBucketConfigPrivateKey(bucketConfig.key),
@@ -756,17 +751,17 @@ export class FileService {
   }
 
   /**
-   * initialize the iam client
+   * Initialize the iam client
    */
-  private async getCloudIAMService(
+  private getCloudIAMService(
     clientEmail: string,
     privateKey: string,
-  ): Promise<CloudIAMService> {
+  ): CloudIAMService {
     return new CloudIAMService(clientEmail, privateKey);
   }
 
   /**
-   * returns fileName and filePath
+   * Returns fileName and filePath
    */
   private generateFileNamePathFromStoragePath(storagePath: string): {
     fileName: string;
@@ -782,7 +777,7 @@ export class FileService {
   }
 
   /**
-   * decodes bucket private key
+   * Decodes bucket private key
    */
   private decodeBucketConfigPrivateKey(key: string): string {
     return UtilsService.base64decodeKey(key);
@@ -826,7 +821,7 @@ export class FileService {
   }
 
   /**
-   * archive the file which passed the archival date
+   * Archive the file which passed the archival date
    */
   async archiveArchivalDatePassedFiles(): Promise<boolean> {
     this.logger.log(`archiving files with archival date passed`);
@@ -845,7 +840,7 @@ export class FileService {
       this.logger.log(`${files.length} files found for archival`);
 
       for (const file of files) {
-        this.archiveDirectory(file.uuid);
+        await this.archiveDirectory(file.uuid);
       }
       this.logger.log(
         `archived files with archival date passed completed for: ${files.length}`,

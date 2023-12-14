@@ -17,7 +17,7 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   /**
-   * registers a plugin for the project.
+   * Registers a plugin for the project.
    */
   @Post('plugin')
   @UseGuards(JwtAuthGuard)

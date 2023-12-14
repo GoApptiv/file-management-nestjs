@@ -63,7 +63,9 @@ import { SlackChannel } from './shared/constants/slack-channel.enum';
 
         const writeStream = createWriteStream({
           credentials: {
+            // eslint-disable-next-line camelcase
             client_email: configService.gcpCredentials.logging.email,
+            // eslint-disable-next-line camelcase
             private_key: configService.gcpCredentials.logging.privateKey,
           },
           projectId: configService.gcpCredentials.projectId,
@@ -78,7 +80,7 @@ import { SlackChannel } from './shared/constants/slack-channel.enum';
             name: logName,
             stream: writeStream,
             redact: ['req.headers.authorization'],
-            genReqId: () => uuidv4(),
+            genReqId: (): string => uuidv4(),
             transport: !configService.isProduction
               ? {
                   target: 'pino-pretty',

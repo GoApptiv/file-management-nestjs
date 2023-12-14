@@ -64,7 +64,7 @@ export class FileVariantRepository extends Repository<FileVariant> {
   }
 
   /**
-   * update the status and storagePath by id
+   * Update the status and storagePath by id
    */
   async updateStatusAndStoragePathById(
     id: number,

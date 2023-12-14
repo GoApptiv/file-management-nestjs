@@ -25,7 +25,7 @@ export class ProjectService {
   ) {}
 
   /**
-   * register plugin for the project
+   * Register plugin for the project
    */
   async registerPlugin(
     pluginCode: string,
@@ -94,7 +94,7 @@ export class ProjectService {
       return false;
     }
 
-    // raise event
+    // Raise event
     const eventData = new ProjectPluginRegisteredEvent();
     eventData.pluginId = plugin.id;
     eventData.projectId = projectId;
@@ -109,7 +109,7 @@ export class ProjectService {
   }
 
   /**
-   * generates a unique name for the subscriber for project and plugin
+   * Generates a unique name for the subscriber for project and plugin
    */
   generatePluginStatusSubscriberName = (
     pluginCode: string,

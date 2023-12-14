@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: any): Promise<any> {
     const project = await this.projectRepository.findByCode(payload.username);
     if (!project) {
       return {

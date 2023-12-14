@@ -23,7 +23,9 @@ export class CloudStorageService {
   constructor(email: string, privateKey: string, bucket: string) {
     this.storage = new Storage({
       credentials: {
+        // eslint-disable-next-line camelcase
         private_key: privateKey,
+        // eslint-disable-next-line camelcase
         client_email: email,
       },
       projectId: UtilsService.extractProjectIdFromGcpEmailId(email),
@@ -32,7 +34,7 @@ export class CloudStorageService {
   }
 
   /**
-   * generate upload signed url
+   * Generate upload signed url
    */
   async generateUploadSignedUrl(
     path: string,
@@ -53,7 +55,7 @@ export class CloudStorageService {
   }
 
   /**
-   * generate read signed url
+   * Generate read signed url
    */
   async generateReadSignedUrl(
     path: string,
@@ -72,7 +74,7 @@ export class CloudStorageService {
   }
 
   /**
-   * sets the storage class to archive which is of minimum duration 365 days
+   * Sets the storage class to archive which is of minimum duration 365 days
    */
   async setStorageClassToArchive(
     file: string,
@@ -81,7 +83,7 @@ export class CloudStorageService {
   }
 
   /**
-   * sets the directory storage class to archive which is of minimum duration 365 days
+   * Sets the directory storage class to archive which is of minimum duration 365 days
    */
   async setDirectoryStorageClassToArchive(directory: string): Promise<void> {
     const filePages = await this.bucket.getFiles({ prefix: directory });
@@ -93,7 +95,7 @@ export class CloudStorageService {
   }
 
   /**
-   * sets the storage class to standard
+   * Sets the storage class to standard
    */
   async setStorageClassToStandard(
     file: string,
@@ -102,7 +104,7 @@ export class CloudStorageService {
   }
 
   /**
-   * sets the directory storage class to standard
+   * Sets the directory storage class to standard
    */
   async setDirectoryStorageClassToStandard(directory: string): Promise<void> {
     const filePages = await this.bucket.getFiles({ prefix: directory });

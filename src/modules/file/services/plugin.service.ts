@@ -9,7 +9,7 @@ export class PluginService {
   constructor(private readonly pluginRepository: PluginRepository) {}
 
   /**
-   * returns an action that fetches the plugins.
+   * Returns an action that fetches the plugins.
    */
   async fetch(): Promise<Plugin[]> {
     const filters: FilterPluginDAO = {
