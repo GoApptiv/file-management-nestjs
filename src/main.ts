@@ -17,6 +17,7 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
 import { AppConfigModule } from './config/config.module';
+import { AppClusterService } from './app-cluster.service';
 
 async function bootstrap(): Promise<any> {
   const app = await NestFactory.create(AppModule, {
@@ -70,4 +71,5 @@ async function bootstrap(): Promise<any> {
 
   return app;
 }
-void bootstrap();
+
+AppClusterService.clusterize(bootstrap);

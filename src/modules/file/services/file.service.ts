@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { Injectable, Logger } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repository';
 import { TemplateRepository } from '../repositories/template.repository';
