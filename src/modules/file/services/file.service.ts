@@ -826,30 +826,23 @@ export class FileService {
   async archiveArchivalDatePassedFiles(): Promise<boolean> {
     this.logger.log(`archiving files with archival date passed`);
 
-    let allFilesFetched = false;
-
-    while (!allFilesFetched) {
-      const files =
-        await this.fileRepository.fetchByStatusAndBeforeArchivalDateTimeAndIsArchivedStatus(
-          FileStatus.UPLOADED,
-          moment().toDate(),
-          false,
-          5000,
-        );
-
-      this.logger.log(`${files.length} files found for archival`);
-
-      for (const file of files) {
-        await this.archiveDirectory(file.uuid);
-      }
-      this.logger.log(
-        `archived files with archival date passed completed for: ${files.length}`,
+    const files =
+      await this.fileRepository.fetchByStatusAndBeforeArchivalDateTimeAndIsArchivedStatus(
+        FileStatus.UPLOADED,
+        moment().toDate(),
+        false,
+        1000,
       );
 
-      if (files.length < 5000) {
-        allFilesFetched = true;
-      }
+    this.logger.log(`${files.length} files found for archival`);
+
+    for (const file of files) {
+      await this.archiveDirectory(file.uuid);
     }
+    this.logger.log(
+      `archived files with archival date passed completed for: ${files.length}`,
+    );
+
     return true;
   }
 }
