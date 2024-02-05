@@ -118,10 +118,6 @@ export class AppConfigService {
         email: this.getString('GCP_PUBSUB_EMAIL'),
         privateKey: this.getString('GCP_PUBSUB_KEY'),
       },
-      logging: {
-        email: this.getString('GCP_LOGGING_EMAIL'),
-        privateKey: this.getString('GCP_LOGGING_KEY'),
-      },
     };
   }
 

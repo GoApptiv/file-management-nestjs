@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { createWriteStream } from 'pino-stackdriver';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -61,24 +60,9 @@ import { SlackChannel } from './shared/constants/slack-channel.enum';
       useFactory: (configService: AppConfigService) => {
         const logName = `${configService.gcpCredentials.logName}-${configService.appEnvironment}`;
 
-        const writeStream = createWriteStream({
-          credentials: {
-            // eslint-disable-next-line camelcase
-            client_email: configService.gcpCredentials.logging.email,
-            // eslint-disable-next-line camelcase
-            private_key: configService.gcpCredentials.logging.privateKey,
-          },
-          projectId: configService.gcpCredentials.projectId,
-          logName: logName,
-          resource: {
-            type: 'global',
-          },
-        });
-
         return {
           pinoHttp: {
             name: logName,
-            stream: writeStream,
             redact: ['req.headers.authorization'],
             genReqId: (): string => uuidv4(),
             transport: !configService.isProduction
