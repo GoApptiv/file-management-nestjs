@@ -6,6 +6,12 @@ pipeline {
         GCR_REGISTRY = "asia.gcr.io"
         GCR_PROJECT_ID = "goapptiv/file-management"
         GCR_IMAGE_NAME = "file-management-nestjs"
+        CLOUD_RUN_REGION = "asia-south1"
+        CLOUD_RUN_SERVICE_NAME = "file-management-nestjs"
+        CLOUD_RUN_SQL_CONNECTION_NAME = "oceanic-bindery-327007:asia-south1:file-management-production"
+        CLOUD_RUN_MAX_INSTANCES = 6
+        CLOUD_RUN_MEMORY = "2Gi"
+        CLOUD_RUN_CPU = 1
     }
 
     stages {
@@ -52,40 +58,59 @@ pipeline {
 
         stage("Push Docker Image") {
             steps {
-                sh 'gcloud auth configure-docker ${GCR_REGISTRY} -q'
+                sh 'gcloud auth configure-docker ${GCR_REGISTRY} --quiet'
                 sh 'docker push -a ${GCR_REGISTRY}/${GCR_PROJECT_ID}/${GCR_IMAGE_NAME}'
             }
         }
 
-        stage("Deploy to Compute Engine") {
+        stage("Deploy to Cloud Run") {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'file-management-nestjs-vm-ssh', 
-                                                   keyFileVariable: 'SSH_PRIVATE_KEY',
-                                                   passphraseVariable: '', 
-                                                   usernameVariable: 'SSH_USERNAME'),          
-                                string(credentialsId: 'file-management-nestjs-vm-ip', variable: 'VM_IP')]) {
-                    sh 'ssh -o StrictHostKeyChecking=no -i "${SSH_PRIVATE_KEY}" "${SSH_USERNAME}"@"${VM_IP}" "sudo gcloud auth configure-docker ${GCR_REGISTRY} -q && cd apps && sudo docker compose pull && sudo docker compose down && sudo docker compose up -d"'
+
+                withCredentials([file(credentialsId: 'proj-goapptiv-cloud-run-sa-key', variable: 'SERVICE_ACCOUNT_KEY_PATH')]) {
+
+                    script {
+                        // Read the contents of the file into a String
+                        def serviceAccountKeyJson = readFile(SERVICE_ACCOUNT_KEY_PATH).trim()
+
+                        // Parse the JSON to get the client_email
+                        def serviceAccountData = readJSON text: serviceAccountKeyJson
+
+                        // encode the service account key to base64
+                        def encodedKey = serviceAccountKeyJson.bytes.encodeBase64().toString()
+
+                        env.SERVICE_ACCOUNT_EMAIL = serviceAccountData.client_email
+
+                        env.CLOUD_RUN_SERVICE_ACCOUNT_KEY_CONTENT = encodedKey
+                    }
+
+                    sh 'gcloud auth activate-service-account --key-file="${SERVICE_ACCOUNT_KEY_PATH}"'
+
+                    sh '''
+                        gcloud run deploy ${CLOUD_RUN_SERVICE_NAME} \\
+                            --image ${GCR_REGISTRY}/${GCR_PROJECT_ID}/${GCR_IMAGE_NAME}:latest \\
+                            --platform managed \\
+                            --region ${CLOUD_RUN_REGION} \\
+                            --allow-unauthenticated \\
+                            --add-cloudsql-instances ${CLOUD_RUN_SQL_CONNECTION_NAME} \\
+                            --service-account ${SERVICE_ACCOUNT_EMAIL} \\
+                            --set-env-vars="KEY_FILE_CONTENT=${CLOUD_RUN_SERVICE_ACCOUNT_KEY_CONTENT}" \\
+                            --max-instances ${CLOUD_RUN_MAX_INSTANCES} \\
+                            --memory ${CLOUD_RUN_MEMORY} \\
+                            --cpu ${CLOUD_RUN_CPU} \\
+                    '''
                 }
             }
 
             post {
                 success {
-                    // send success email notification
                     mail to: 'sagar.vaghela@goapptiv.com',
-                         subject: "Pipeline Successful: ${env.JOB_NAME}",
-                         body: "Your Jenkins pipeline ${env.JOB_NAME} has completed successfully. Here are the details:\n\n" +
-                               "Build Number: ${env.BUILD_NUMBER}\n" +
-                               "Duration: ${currentBuild.durationString}\n" +
-                               "Status: SUCCESS"
+                        subject: "Pipeline Successful: ${env.JOB_NAME}",
+                        body: "Your Jenkins pipeline ${env.JOB_NAME} has completed successfully.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: SUCCESS"
                 }
                 failure {
-                    // send failure email notification
                     mail to: 'sagar.vaghela@goapptiv.com',
-                         subject: "Pipeline Failed: ${env.JOB_NAME}",
-                         body: "Your Jenkins pipeline ${env.JOB_NAME} has failed. Please check the console output for details. Here are the details:\n\n" +
-                               "Build Number: ${env.BUILD_NUMBER}\n" +
-                               "Duration: ${currentBuild.durationString}\n" +
-                               "Status: FAILURE"
+                        subject: "Pipeline Failed: ${env.JOB_NAME}",
+                        body: "Your Jenkins pipeline ${env.JOB_NAME} has failed. Please check the console output for more details.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: FAILURE"
                 }
             }
         }

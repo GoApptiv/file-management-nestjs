@@ -72,15 +72,15 @@ export class AppConfigService {
       maintainer: this.getString('APP_MAINTAINER'),
       url: this.getString('APP_URL'),
       supportEmail: this.getString('APP_SUPPORT_EMAIL'),
-      port: this.getString('APP_PORT'),
+      port: this.getString('PORT'),
     };
   }
 
   get typeOrmConfig(): TypeOrmModuleOptions {
-    return {
+    const connectionType = this.getString('DB_CONNECTION_TYPE');
+
+    const commonConfig: TypeOrmModuleOptions = {
       type: 'mysql',
-      host: this.getString('DB_HOST'),
-      port: this.getNumber('DB_PORT'),
       username: this.getString('DB_USERNAME'),
       password: this.getString('DB_PASSWORD'),
       database: this.getString('DB_DATABASE'),
@@ -88,6 +88,22 @@ export class AppConfigService {
       synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),
     };
+
+    if (connectionType === 'socket') {
+      return {
+        ...commonConfig,
+        host: this.getString('DB_HOST'),
+        extra: {
+          socketPath: this.getString('DB_SOCKET_PATH'),
+        },
+      };
+    } else {
+      return {
+        ...commonConfig,
+        host: this.getString('DB_HOST'),
+        port: this.getNumber('DB_PORT'),
+      };
+    }
   }
 
   get jwtSecret(): string {

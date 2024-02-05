@@ -16,6 +16,4 @@ COPY . .
 
 RUN npx nest build
 
-EXPOSE 80
-
 CMD ["npm", "run" , "start:prod"]
