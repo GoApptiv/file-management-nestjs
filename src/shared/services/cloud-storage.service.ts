@@ -114,4 +114,12 @@ export class CloudStorageService {
       ),
     );
   }
+
+  /**
+   * Check if the file exists in the bucket
+   */
+  async fileExists(file: string): Promise<boolean> {
+    const [exists] = await this.bucket.file(file).exists();
+    return exists;
+  }
 }

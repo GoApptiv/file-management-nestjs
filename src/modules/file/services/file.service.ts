@@ -45,6 +45,7 @@ import {
   GaNotFoundException,
 } from '@goapptiv/exception-handler-nestjs';
 import { FileErrorCode } from '../constants/errors.enum';
+import { FileNotUploadedException } from '../exceptions/file-not-uploaded.exception';
 
 @Injectable()
 export class FileService {
@@ -138,6 +139,19 @@ export class FileService {
    */
   async confirmUpload(uuid: string): Promise<ConfirmUploadResult> {
     this.logger.log(`confirm upload for file with uuid: ${uuid}`);
+
+    const file = await this.fileRepository.findByUuid(uuid, [
+      'template',
+      'template.bucketConfig',
+    ]);
+
+    const storage = this.getCloudStorageService(file.template.bucketConfig);
+
+    const isUploaded = await storage.fileExists(file.storagePath);
+
+    if (!isUploaded) {
+      throw new FileNotUploadedException(uuid);
+    }
 
     const updateResult =
       await this.fileRepository.updateStatusAndIsUploadedByUuid(
