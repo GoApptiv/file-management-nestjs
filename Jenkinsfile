@@ -100,27 +100,24 @@ pipeline {
                     '''
                 }
             }
-
-            post {
-                success {
-                    mail to: 'sagar.vaghela@goapptiv.com',
-                        subject: "Pipeline Successful: ${env.JOB_NAME}",
-                        body: "Your Jenkins pipeline ${env.JOB_NAME} has completed successfully.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: SUCCESS"
-                }
-                failure {
-                    mail to: 'sagar.vaghela@goapptiv.com',
-                        subject: "Pipeline Failed: ${env.JOB_NAME}",
-                        body: "Your Jenkins pipeline ${env.JOB_NAME} has failed. Please check the console output for more details.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: FAILURE"
-                }
-            }
         }
+    }
 
-        stage("Cleanup") {
-            steps {
-                // Remove .env secret
-                sh 'rm .env'
-
-                // Remove all docker images
+    post {
+        success {
+            mail to: 'sagar.vaghela@goapptiv.com',
+                subject: "Pipeline Successful: ${env.JOB_NAME}",
+                body: "Your Jenkins pipeline ${env.JOB_NAME} has completed successfully.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: SUCCESS"
+        }
+        failure {
+            mail to: 'sagar.vaghela@goapptiv.com',
+                subject: "Pipeline Failed: ${env.JOB_NAME}",
+                body: "Your Jenkins pipeline ${env.JOB_NAME} has failed. Please check the console output for more details.\nBuild Number: ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nStatus: FAILURE"
+        }
+        always{
+            cleanWs()
+            script{
+                sh 'rm -f .env'
                 sh 'docker image prune -f -a'
             }
         }
