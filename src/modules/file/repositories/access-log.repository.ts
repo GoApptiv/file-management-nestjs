@@ -16,6 +16,9 @@ export class AccessLogRepository extends Repository<AccessLog> {
     return this.save(data);
   }
 
+  /**
+   * Creates new records in bulk
+   */
   async bulkStore(data: StoreAccessLogDAO[]): Promise<InsertResult> {
     return await this.createQueryBuilder()
       .insert()
