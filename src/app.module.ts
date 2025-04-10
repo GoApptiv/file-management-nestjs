@@ -9,9 +9,6 @@ import { FileModule } from './modules/file/file.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { SlackModule } from 'nestjs-slack';
-import { SlackHelperModule } from '@goapptiv/slack-helper-nestjs';
-import { SlackChannel } from './shared/constants/slack-channel.enum';
 
 @Module({
   imports: [
@@ -25,34 +22,6 @@ import { SlackChannel } from './shared/constants/slack-channel.enum';
       imports: [AppConfigModule],
       useFactory: (configService: AppConfigService) =>
         configService.typeOrmConfig,
-      inject: [AppConfigService],
-    }),
-    SlackModule.forRootAsync({
-      isGlobal: true,
-      imports: [AppConfigModule],
-      useFactory: (appConfigService: AppConfigService) => ({
-        type: 'webhook',
-        channels: [
-          {
-            name: SlackChannel.EXCEPTION,
-            url: appConfigService.slackExceptionNotifierWebhook,
-          },
-        ],
-        defaultChannel: SlackChannel.EXCEPTION,
-      }),
-      inject: [AppConfigService],
-    }),
-    SlackHelperModule.registerAsync({
-      isGlobal: true,
-      imports: [AppConfigModule],
-      useFactory: (appConfigService: AppConfigService) => ({
-        appEnv: appConfigService.appEnvironment,
-        channels: {
-          default: SlackChannel.GENERAL,
-          general: SlackChannel.GENERAL,
-          exceptions: SlackChannel.EXCEPTION,
-        },
-      }),
       inject: [AppConfigService],
     }),
     LoggerModule.forRootAsync({

@@ -86,12 +86,11 @@ export class CloudStorageService {
    * Sets the directory storage class to archive which is of minimum duration 365 days
    */
   async setDirectoryStorageClassToArchive(directory: string): Promise<void> {
-    const filePages = await this.bucket.getFiles({ prefix: directory });
-    filePages.forEach((files) =>
-      files.forEach((file) =>
-        this.bucket.file(file.name).setStorageClass(BucketType.ARCHIVE),
-      ),
-    );
+    const [files] = await this.bucket.getFiles({ prefix: directory });
+
+    files.forEach((file) => {
+      this.bucket.file(file.name).setStorageClass(BucketType.ARCHIVE);
+    });
   }
 
   /**
@@ -107,11 +106,9 @@ export class CloudStorageService {
    * Sets the directory storage class to standard
    */
   async setDirectoryStorageClassToStandard(directory: string): Promise<void> {
-    const filePages = await this.bucket.getFiles({ prefix: directory });
-    filePages.forEach((files) =>
-      files.forEach((file) =>
-        this.bucket.file(file.name).setStorageClass(BucketType.STANDARD),
-      ),
+    const [files] = await this.bucket.getFiles({ prefix: directory });
+    files.forEach((file) =>
+      this.bucket.file(file.name).setStorageClass(BucketType.STANDARD),
     );
   }
 
